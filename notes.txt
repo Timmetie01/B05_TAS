@@ -1,0 +1,15 @@
+Potentially useful functions:
+
+Required for interpolation
+https://numpy.org/devdocs/reference/generated/numpy.convolve.html
+
+Sacitzkry-golay filter:
+https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html#scipy.signal.savgol_filter
+
+All kinds of filters:
+https://docs.scipy.org/doc/scipy/reference/signal.html
+
+Kalman filter:
+https://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/
+https://stackoverflow.com/questions/43377626/how-to-use-kalman-filter-in-python-for-location-data
+
