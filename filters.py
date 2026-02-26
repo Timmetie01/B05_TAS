@@ -27,6 +27,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     if axis == 1:
         data = np.transpose(data)
 
+    #Apply the different extension types. Mirror mirrors the array at the ends, none just makes the output shorter
     if extension_type == "mirror":
         if len(data) < window_size:
             print('data matrix size should at least be as large as the window_size for meaningful results.')
@@ -40,6 +41,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
         print('choose correct extension type for moving_averages')
         quit()
 
+    #Actually apply the filter
     filtered_data = apply_moving_average_filter(data, window_size)
 
     #Transpose the data if other axis is required. It was also flipped before the main part of this function, so is now back to normal.
