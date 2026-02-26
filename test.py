@@ -5,4 +5,5 @@ import filters
 data = data_import.get_velocity_test_data()
 print(data)
 
-graphing.test_filter(data, data)
+window_size = 251
+graphing.test_filter(filters.moving_averages(data, window_size, extension_type='none'), data, filter_shift=(window_size-1)/2)

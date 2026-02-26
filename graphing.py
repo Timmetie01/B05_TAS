@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def test_filter(filtered_data, input_data, discrete_points=True, truth=None, showplot=True):
+def test_filter(filtered_data, input_data, discrete_points=True, truth=None, showplot=True, filter_shift=0):
     '''
     Graphs the filtered data, input data and if present truth
     
@@ -21,7 +21,7 @@ def test_filter(filtered_data, input_data, discrete_points=True, truth=None, sho
 
     for i in range(len(filtered_data[0,:])):
         print(len(filtered_data[:,i]))
-        plt.plot(np.arange(0, len(filtered_data[:,i]), 1), filtered_data[:,i], label='Filtered data', color='darkblue')
+        plt.plot(np.arange(0, len(filtered_data[:,i]), 1) + filter_shift, filtered_data[:,i], label='Filtered data', color='darkblue')
         if discrete_points:
             plt.scatter(np.arange(0, len(input_data[:,i]), 1), input_data[:,i], label='Original data', color='firebrick')
         else:
