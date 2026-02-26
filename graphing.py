@@ -31,6 +31,3 @@ def test_filter(filtered_data, input_data, discrete_points=True, truth=None, sho
         plt.title('Filtered vs unfiltered data')
         plt.legend()
         plt.show()
-
-
-test_filter(np.array([0,0.1, 0.19, 0.3, 0.4]), np.array([0.1, 0.11, 0.19, 0.32, 0.37]))
