@@ -11,8 +11,8 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     :param data: 
     :param window_size: 
     :param axis: 0 or 1, along which axis should the input array be filtered
-    :param extension_type: 'mirror' mirrors data near the ends over the ends, 'none' doesnt extend the input, thus reducing the output data by window_size - 1 entries. 
-    :return filtered_data: 
+    :param extension_type: 'mirror' mirrors data near the ends over the ends, 'constant' repeats the outermost values, 'none' doesnt extend the input, thus reducing the output data by window_size - 1 entries. 
+    :return filtered_data: The array with the filter applied. 
     '''
     #throw an error if the input data is more than 2 dimensional, since the current implementation will not work this way
     if len(np.shape(data)) > 2:
@@ -27,38 +27,38 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     if axis == 1:
         data = np.transpose(data)
 
-    #Apply the different extension types. Mirror mirrors the array at the ends, none just makes the output shorter
+    #Apply the different extension types. Mirror mirrors the array at the ends, none just makes the output shorter. Constant repeats the values at the ends.
     if extension_type == "mirror":
-        print('not implemented yet, sorry!')
-        quit()
         if len(data) < window_size:
             print('data matrix size should at least be as large as the window_size for meaningful results.')
             quit()
-        extension_size = (window_size - 1)//2
-        data = np.insert(data, 0, data[0:window_size,:])
-        data = np.insert(data, -1, data[-1 * data[0:window_size,:]:-1,:])
+        extension_size = (window_size + 1)//2
+        data = np.insert(data, 0, np.array(data[0:extension_size,:]), 0)
+        data = np.insert(data, -1, np.array(data[-1 * extension_size:-1,:]), 0)
+
+    elif extension_type == "constant":
+        print('Constant extension type not implemented yet, sorry...')
+        raise NotImplementedError
+    
     elif extension_type == "none":
         pass
+
     else:
         print('choose correct extension type for moving_averages')
         quit()
 
-    #Actually apply the filter
-    filtered_data = apply_moving_average_filter(data, window_size)
+    #Size the output matrix. If using extension, the data will be scaled up beforehand, and now scaled down again to original size.
+    filtered_data = np.zeros((np.size(data, 0) - window_size + 1, np.size(data, 1)))
+    
+    #loop for taking the averages:
+    #Basically taking certain length original samples, summing them over the correct axis and dividing over window_length, 
+    #and entering that as the new data in another matrix
+    for i in range(len(filtered_data)):
+        filtered_data[i,:] = np.sum(data[i:i+window_size, :], axis=0) / window_size
 
     #Transpose the data if other axis is required. It was also flipped before the main part of this function, so is now back to normal.
     if axis == 1:
         filtered_data = np.transpose(filtered_data)
     return filtered_data
 
-
-def apply_moving_average_filter(data, window_size):
-    #Size the output matrix. 
-    filtered_data = np.zeros((np.size(data, 0) - window_size + 1, np.size(data, 1)))
-
-    #loop for taking the averages
-    for i in range(len(filtered_data)):
-        filtered_data[i,:] = np.sum(data[i:i+window_size, :], axis=0) / window_size
-
-    return filtered_data
 

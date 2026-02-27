@@ -1,9 +1,8 @@
 import graphing
 import data_import
 import filters
+import classes
 
-data = data_import.get_velocity_test_data()
-print(data)
+data = classes.Data('test')
 
-window_size = 51
-graphing.test_filter(filters.moving_averages(data, window_size, extension_type='none'), data, filter_shift=(window_size-1)/2)
+data.plot_ma_filter(51, extension_type='mirror')
