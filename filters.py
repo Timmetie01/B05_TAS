@@ -15,7 +15,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     :return filtered_data: The array with the filter applied. 
     '''
     #throw an error if the input data is more than 2 dimensional, since the current implementation will not work this way
-    if len(np.shape(data)) > 2:
+    if data.ndim > 2:
         print("moving_averages filter can only be applied on a 2d array of data. If you need this on higher dimensions, feel free to implement it.")
         quit()
 
