@@ -85,7 +85,12 @@ class Data:
             y_array = self.general_derivative(i, axis)
 
             shift = (window_size-1)/2 if extension_type == 'none' else 0
-            graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=showplot)
-
+            graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=False)
+        
+        if showplot:
+            import matplotlib.pyplot as plt
+            plt.title('Filtered vs unfiltered data')
+            plt.legend()
+            plt.show()
     
         
