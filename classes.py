@@ -36,7 +36,7 @@ class Data:
         else:
             return self.second_derivative
         
-    def generic_derivative(self, n, axis=0, array=None):
+    def general_derivative(self, n, axis=0, array=None):
         '''
         Calculates the n'th derivative of the position. Results not cached, so calling 'velocity()' and 'acceleration()' is preferred.
 
@@ -82,7 +82,7 @@ class Data:
         #For each 
         for i in np.nditer([derivative]):
 
-            y_array = self.generic_derivative(i, axis)
+            y_array = self.general_derivative(i, axis)
 
             shift = (window_size-1)/2 if extension_type == 'none' else 0
             graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=showplot)
