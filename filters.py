@@ -6,10 +6,11 @@ import scipy as sp
 def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     '''
     Applies the moving averages filter along the specified axis of the input array, and outputs the filtered array
-    Either 1D or 2D arrays possible as input
+    This function takes approximately 0.9 seconds to execute on 250k datapoints
+
     
-    :param data: 
-    :param window_size: 
+    :param data: Either 1D or 2D arrays possible as input which should be filtered
+    :param window_size: The 'window' width, as used by the moving averages filter
     :param axis: 0 or 1, along which axis should the input array be filtered
     :param extension_type: 'mirror' mirrors data near the ends over the ends, 'constant' repeats the outermost values, 'none' doesnt extend the input, thus reducing the output data by window_size - 1 entries. 
     :return filtered_data: The array with the filter applied. 

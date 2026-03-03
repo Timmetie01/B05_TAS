@@ -38,9 +38,11 @@ class Data:
         
     def generic_derivative(self, n, axis=0, array=None):
         '''
-        Calculates the n'th derivative of the position 
+        Calculates the n'th derivative of the position. Results not cached, so calling 'velocity()' and 'acceleration()' is preferred.
+
+
         :param n: The order of the derivative
-        :param axis: Along which axis the data matrix should be derived. Default to 0, should work almost always
+        :param axis: Along which axis the data matrix should be derived. Defaults to 0, which should almost always be correct.
         :param array: The input array. None defaults to self.position
         '''
 

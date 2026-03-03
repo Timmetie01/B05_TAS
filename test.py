@@ -2,6 +2,7 @@ import graphing
 import data_import
 import filters
 import classes
+import time
 
 data = classes.Data('test')
 

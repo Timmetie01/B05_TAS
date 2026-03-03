@@ -4,6 +4,7 @@ import numpy as np
 def num_derivative(input_array, frequency, axis=0):
     '''
     Returns the numerical derivative of the input array along the specified axis. Default is vertically along 2d array
+    For 250k datapoints, this function takes approximately 0.5 seconds to run.
     
     :param input_array: 1d or 2d array of which the derivative should be taken along a specific axis
     :param frequency: the frequency (in Hz) of the measurements
@@ -22,7 +23,7 @@ def num_derivative(input_array, frequency, axis=0):
 
     output_array = np.zeros_like(input_array)
     for i in range(len(output_array)-1):
-        output_array[i+1,:] = (input_array[i+1,:] - input_array[i,:])/frequency
+        output_array[i+1,:] = (input_array[i+1,:] - input_array[i,:])*frequency
 
     if axis == 1:
         output_array = np.transpose(output_array)
