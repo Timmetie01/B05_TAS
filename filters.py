@@ -6,7 +6,7 @@ import scipy as sp
 def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     '''
     Applies the moving averages filter along the specified axis of the input array, and outputs the filtered array
-    This function takes approximately 0.9 seconds to execute on 250k datapoints
+    This function takes approximately 0.01 seconds to execute on 250k datapoints
 
     
     :param data: Either 1D or 2D arrays possible as input which should be filtered
@@ -49,14 +49,16 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
         quit()
 
     #Size the output matrix. If using extension, the data will be scaled up beforehand, and now scaled down again to original size.
-    filtered_data = np.zeros((np.size(data, 0) - window_size + 1, np.size(data, 1)))
+    filtered_data = np.zeros((np.size(data, 0) - window_size, np.size(data, 1)))
     
-    #loop for taking the averages:
-    #Basically taking certain length original samples, summing them over the correct axis and dividing over window_length, 
-    #and entering that as the new data in another matrix
-    for i in range(len(filtered_data)):
-        filtered_data[i,:] = np.sum(data[i:i+window_size, :], axis=0) / window_size
+    #Summing the data matrix with the offset before dividing it by window size, effectively taking averages
+    for i in range(window_size):
+        filtered_data += data[i:(-window_size + i),:]
+    
+    #for i in range(len(filtered_data))
+        #filtered_data[i,:] = np.sum(data[i:i+window_size, :], axis=0) / window_size
 
+    filtered_data = filtered_data / (window_size)
     #Transpose the data if other axis is required. It was also flipped before the main part of this function, so is now back to normal.
     if axis == 1:
         filtered_data = np.transpose(filtered_data)
