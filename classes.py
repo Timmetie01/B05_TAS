@@ -1,4 +1,5 @@
 import numpy as np
+import time
 
 
 class Data:
@@ -38,7 +39,7 @@ class Data:
         
     def general_derivative(self, n, axis=0, array=None):
         '''
-        Calculates the n'th derivative of the position. Results not cached, so calling 'velocity()' and 'acceleration()' is preferred.
+        Calculates the n'th derivative of the position. Results not cached, so calling 'velocity()' and 'acceleration()' is preferred when large data quantities are used.
 
 
         :param n: The order of the derivative
@@ -57,6 +58,15 @@ class Data:
             
 
     def ma_filtered(self, window_size, axis=0, extension_type='none'):
+        '''
+        Returns the position data after applying a moving averages filter. 
+
+        :param window_size: The width of the window across which averages are taken
+        :param axis: Along which axis of the 2D position array the averaging should be applied (0 should be the correct axis)
+        :param extension_type: 'mirror' mirrors data near the ends over the ends, 'constant' repeats the outermost values, 'none' doesnt extend the input, thus reducing the output data by window_size - 1 entries. 
+
+        :return ma_filtered_values: The position array with moving averages applied, with the same or a slightly smaller shape (if extension_type == None).
+        '''
         import filters
         #Apply the filter the first time it is called. After that, keep the filtered data such that it does not have to be recalculated.
         if self.ma_filtered_values == None:
@@ -79,11 +89,12 @@ class Data:
         import graphing
         import filters
 
-        #For each 
+        #Plot each derivative asked for.
         for i in np.nditer([derivative]):
 
             y_array = self.general_derivative(i, axis)
 
+            #If there is no extension applied to the ends of the array, shift the result in the plot such that each datapoint corresponds to each filtered data point.
             shift = (window_size-1)/2 if extension_type == 'none' else 0
             graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=False)
         

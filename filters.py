@@ -1,12 +1,10 @@
 import numpy as np
 import scipy as sp
 
-
-
 def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     '''
     Applies the moving averages filter along the specified axis of the input array, and outputs the filtered array
-    This function takes approximately 0.01 seconds to execute on 250k datapoints
+    This function takes approximately 0.015 seconds to execute on 250k datapoints 
 
     
     :param data: Either 1D or 2D arrays possible as input which should be filtered
@@ -55,6 +53,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     for i in range(window_size):
         filtered_data += data[i:(-window_size + i),:]
     
+    #Original iterative implementation (100x slower)
     #for i in range(len(filtered_data))
         #filtered_data[i,:] = np.sum(data[i:i+window_size, :], axis=0) / window_size
 
@@ -63,5 +62,3 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     if axis == 1:
         filtered_data = np.transpose(filtered_data)
     return filtered_data
-
-

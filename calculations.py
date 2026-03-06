@@ -1,7 +1,6 @@
 import numpy as np
 import time
 
-
 def num_derivative(input_array, frequency, axis=0):
     '''
     Returns the numerical derivative of the input array along the specified axis. Default is vertically along 2d array
@@ -12,8 +11,6 @@ def num_derivative(input_array, frequency, axis=0):
     :param axis: Choose along which axis the derivative should be taken.
 
     :return output_array: The array of derivatives, structured similarly to the input_array
-
-
     '''
     t0 = time.time()
     if input_array.ndim > 2:
@@ -32,13 +29,9 @@ def num_derivative(input_array, frequency, axis=0):
     output_array = np.insert(output_array,  0, np.array([0] * len(output_array[0])), 0)
     output_array = np.insert(output_array, -1, np.array([0] * len(output_array[0])), 0)
     
-
     if axis == 1:
         output_array = np.transpose(output_array)
-
 
     print(time.time() - t0)
     return output_array
     
-
-

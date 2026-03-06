@@ -40,4 +40,3 @@ def test_filter(filtered_data, input_data, truth=None, discrete_points=True, sho
         plt.show()
 
     return None
-
