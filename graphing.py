@@ -2,12 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def test_filter(filtered_data, input_data, truth=None, discrete_points=True, showplot=True, filter_shift=0):
+def test_filter(filtered_data, input_data, difference=False, truth=None, discrete_points=True, showplot=True, filter_shift=0):
     '''
     Graphs the filtered data, input data and if present truth
     
     :param filtered_data: 1 or 2d array of the filtered data. Plotted along axis 1
     :param input_data: 1 or 2d array of the original data points. Plotted along axis 1
+    :param difference: Plots the difference between filterd and unfiltered data.
     :param truth: Optional extra 1 or 2d array to be plotted, not implemented quite yet
     :param discrete_points: True represents original data as scatter plot, False gives line represenation
     :param showplot: True styles the plot and calls plt.show(), False doesn't such that another plot can be layered over this one
@@ -34,6 +35,12 @@ def test_filter(filtered_data, input_data, truth=None, discrete_points=True, sho
         else:
             plt.plot(np.arange(0, len(input_data[:,i]), 1), input_data[:,i], label='Original data', color='firebrick')
     
+        if difference:
+            print('Showing the difference is not implemented yet...')
+            raise NotImplementedError
+        #    filter_delta = input_data[filter_shift:-filter_shift,:] - filtered_data
+        #    plt.plot(np.arange(0, len(filtered_data[:,i]), 1) + filter_shift, filter_delta[:,i], label='Difference', color='darkgreen')
+
     if showplot:
         plt.title('Filtered vs unfiltered data')
         plt.legend()

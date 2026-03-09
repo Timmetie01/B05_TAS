@@ -75,7 +75,7 @@ class Data:
         else:
             return self.ma_filtered_values
         
-    def plot_ma_filter(self, window_size, derivative=0, axis=0, extension_type='none', discrete_points=True, showplot=True):
+    def plot_ma_filter(self, window_size, derivative=0, axis=0, extension_type='none', discrete_points=True, showplot=True, difference=True):
         '''
         Plots the data after the moving averages filter and before
 
@@ -96,7 +96,7 @@ class Data:
 
             #If there is no extension applied to the ends of the array, shift the result in the plot such that each datapoint corresponds to each filtered data point.
             shift = (window_size-1)/2 if extension_type == 'none' else 0
-            graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=False)
+            graphing.test_filter(filters.moving_averages(y_array, window_size, axis, extension_type), y_array, discrete_points=discrete_points, filter_shift=shift, showplot=False, difference=difference)
         
         if showplot:
             import matplotlib.pyplot as plt

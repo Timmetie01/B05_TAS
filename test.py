@@ -6,4 +6,4 @@ import time
 
 data = classes.Data('test')
 
-data.plot_ma_filter(51, derivative=0,  extension_type='mirror', discrete_points=False)
+data.plot_ma_filter(51, derivative=0,  extension_type='mirror', difference=False, discrete_points=False)
