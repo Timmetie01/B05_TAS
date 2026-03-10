@@ -116,7 +116,7 @@ class Data:
 
         :return ma_filtered_values: The position array with moving averages applied, with the same or a slightly smaller shape (if extension_type == None).
         '''
-        return NotImplementedError
+        raise NotImplementedError
         import filters
         return filters.moving_averages(self.position, window_size, axis, extension_type)
         
@@ -131,7 +131,7 @@ class Data:
         :param discrete_points: If True, original data will be scattered. False gives a line.
         :param showplot: True calls plt.show(). False doesnt, and it will thus be layered under the next plot created
         '''
-        return NotImplementedError
+        raise NotImplementedError
         import graphing
         import filters
 
