@@ -62,8 +62,8 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
         X = data[:,0]
         Y = data[:,1]
         Z = data[:,2]
-        ax.plot(X, Y, Z, 
-                   #c=np.arange(len(X)), cmap='rainbow', 
+        ax.scatter(X, Y, Z, 
+                   c=np.arange(len(X)), cmap='rainbow', 
                    
                    label=label
                 #, color="darkblue"

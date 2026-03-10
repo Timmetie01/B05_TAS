@@ -23,14 +23,12 @@ relative orbit radius = 2.0 m (nominal)
 relative orbit inclination = 0 deg
 discretiztion = 1 deg (nominal)
 target attitude = 0.4 deg/sec roll
-origin target
 ----------------------------------
 take_004
 relative orbit radius = 2.0 m (nominal)
 relative orbit inclination = 0 deg
 discretiztion = 1 deg (nominal)
 target attitude = 0.1 deg/sec roll
-origin target = [2281.7, 1304.2, 2238.0, 0.0,0.0,0.0]
 ----------------------------------
 take_005 extra trajectory
 rendezvous
