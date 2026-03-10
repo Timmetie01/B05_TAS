@@ -4,6 +4,6 @@ import filters
 import classes
 import time
 
-data = classes.Data('test')
+take_1 = classes.Data('take_001')
 
-data.plot_ma_filter(51, derivative=0,  extension_type='mirror', difference=False, discrete_points=False)
+take_1.plot_3D('arm_position')

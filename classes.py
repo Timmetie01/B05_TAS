@@ -4,58 +4,103 @@ import time
 
 class Data:
     def __init__(self, data_type):
+        '''
+        Sets up the data class for one of the measurement runs. 
+
+        :param data_type: Specify which data to use. Either "test", or "take_00x" where x in [1,5]
+        
+        '''
         import data_import
-        if data_type == 'test':
+        if data_type == "test":
             self.position = data_import.get_velocity_test_data()
             self.frequency = 350 #Hz
+            print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
+        elif data_type[:-1] == "take_00":
+            data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv")
+            targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv")
+
+
+            #Frame number must be an integer:
+            self.frame = np.int64(np.array([data[:,0]]))
+            
+            #The rest of the array is still a string, so it must be converted to a float:
+            data = np.float64(data)
+
+            self.time = np.array([data[:,1]])
+            self.base_rotation_deg = np.array(data[:,2:5])
+            self.base_rotation_rad = self.base_rotation_deg * np.pi / 180
+            self.base_position = np.array(data[:,5:8])
+            self.arm_rotation_deg = np.array(data[:,8:11])
+            self.arm_rotation_rad = self.arm_rotation_deg * np.pi / 180
+            self.arm_position = np.array(data[:,11:14])
+            self.frequency = 20  #Hz
+
         else:
             print("Choose available data type!")
-            quit()
+            raise ValueError
             
-
-        #Set values to None. These will be set once the filter or other calculation is called the first time.
-        #Afterwards, when called, it simply returns the variable instead of applying the filter again. Efficiency!
-        self.ma_filtered_values = None
-        self.derivative = None
-        self.second_derivative = None
-
-    def velocity(self, axis=0):
-        import calculations
-        #Apply the derivative the first time it is called. After that, keep the velocity data such that it does not have to be recalculated.
-        if self.derivative == None:
-            self.derivative = calculations.num_derivative(self.position, self.frequency, axis)
-            return self.derivative
+    def data_selection(self, component):
+        if component == 'base_position':
+            data = self.base_position
+        elif component == 'base_rotation_deg':
+            data = self.base_rotation_deg
+        elif component == 'base_rotation_rad':
+            data = self.base_rotation_rad 
+        elif component == 'arm_position':
+            data = self.arm_position  
+        elif component == 'arm_rotation_deg':
+            data = self.arm_rotation_deg  
+        elif component == 'arm_rotation_rad':
+            data = self.arm_rotation_rad  
         else:
-            return self.derivative
-        
-    def acceleration(self, axis=0):
-        import calculations
-        #Apply the derivatives the first time it is called. After that, keep the acceleration data such that it does not have to be recalculated.
-        if self.second_derivative == None:
-            self.second_derivative = calculations.num_derivative(self.velocity(axis), self.frequency, axis)
-            return self.second_derivative
-        else:
-            return self.second_derivative
-        
-    def general_derivative(self, n, axis=0, array=None):
+            print("Choose available data to take derivative from!")
+            quit()
+        return data
+    
+    
+
+    def general_derivative(self, component, n, axis=0):
         '''
-        Calculates the n'th derivative of the position. Results not cached, so calling 'velocity()' and 'acceleration()' is preferred when large data quantities are used.
+        Calculates the n'th derivative of the position. 
 
-
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg' or 'arm_rotation_rad'
         :param n: The order of the derivative
         :param axis: Along which axis the data matrix should be derived. Defaults to 0, which should almost always be correct.
-        :param array: The input array. None defaults to self.position
         '''
 
         import calculations
-        if array == None:
-            data = self.position
-        else:
-            data = array
+        #I know many if statements is a lame way to implement this but it is quick enough for now
+        data = self.data_selection(component)
+        
+        #Take the derivative n times.
         for i in range(n):
             data = calculations.num_derivative(data, self.frequency, axis)
         return data
-            
+    
+    def plot_3D(self, component, target=True, showplot=True):
+        '''
+        Creates a 3d plot of positional or rotational data
+
+        :param component: Either 'base_position', 'base_rotation', 'arm_position' or 'arm_rotation'
+        :param showplot: True calls plt.show(). False doesnt, and it will thus be layered under the next plot created
+        '''
+        import graphing
+        if component == 'base_rotation':
+            component = 'base_rotation_deg'
+        elif component == 'arm_rotation':
+            component = 'arm_rotation_deg'
+        data = self.data_selection(component)
+        '''
+        if target:
+
+        else:
+            target = None
+        '''
+        target = None
+
+        graphing.trajectory_3d_plot(data, target=target, label=f'{component}', showplot=showplot)
+
+
 
     def ma_filtered(self, window_size, axis=0, extension_type='none'):
         '''
@@ -63,17 +108,13 @@ class Data:
 
         :param window_size: The width of the window across which averages are taken
         :param axis: Along which axis of the 2D position array the averaging should be applied (0 should be the correct axis)
-        :param extension_type: 'mirror' mirrors data near the ends over the ends, 'constant' repeats the outermost values, 'none' doesnt extend the input, thus reducing the output data by window_size - 1 entries. 
+        :param extension_type: 'mirror' mirrors data near the ends over the ends, 'constant' repeats the outermost values, 'none' doesnt extend the component, thus reducing the output data by window_size - 1 entries. 
 
         :return ma_filtered_values: The position array with moving averages applied, with the same or a slightly smaller shape (if extension_type == None).
         '''
+        return NotImplementedError
         import filters
-        #Apply the filter the first time it is called. After that, keep the filtered data such that it does not have to be recalculated.
-        if self.ma_filtered_values == None:
-            self.ma_filtered_values = filters.moving_averages(self.position, window_size, axis, extension_type)
-            return self.ma_filtered_values
-        else:
-            return self.ma_filtered_values
+        return filters.moving_averages(self.position, window_size, axis, extension_type)
         
     def plot_ma_filter(self, window_size, derivative=0, axis=0, extension_type='none', discrete_points=True, showplot=True, difference=True):
         '''
@@ -86,6 +127,7 @@ class Data:
         :param discrete_points: If True, original data will be scattered. False gives a line.
         :param showplot: True calls plt.show(). False doesnt, and it will thus be layered under the next plot created
         '''
+        return NotImplementedError
         import graphing
         import filters
 
@@ -104,4 +146,4 @@ class Data:
             plt.legend()
             plt.show()
     
-        
+    
