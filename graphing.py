@@ -48,31 +48,45 @@ def test_filter(filtered_data, input_data, difference=False, truth=None, discret
 
     return None
 
-def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, True, True), label=None, title=None, showplot=True):
-    ax = plt.figure().add_subplot(projection='3d')
+def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, True, True), label=None, title=None, start_plotting=True, end_plotting=True):
+    if start_plotting:
+        #Since you might want to plot different things on top of each other, making this a global variable ensures it can be called in different functions
+        global ax
+        if dimensions == (True, True, True):
+            ax = plt.figure().add_subplot(projection='3d')   
+        if dimensions == (True, True, False) or dimensions == (True, False, True) or dimensions == (False, True, True):
+            ax = plt.figure().add_subplot()
+
+
     if data is not None:
         X = data[:,0]
         Y = data[:,1]
         Z = data[:,2]
-        ax.plot(X, Y, Z, label=label, color="darkblue")
-    
+        ax.plot(X, Y, Z, label=label
+                #, color="darkblue"
+                )
+        
     if filtered is not None:
         Xf = filtered[:,0]
         Yf = filtered[:,1]
         Zf = filtered[:,2]
-        ax.plot(Xf, Yf, Zf, label=f"{label}, filtered", color="firebrick")
+        ax.plot(Xf, Yf, Zf, label=f"{label}, filtered"
+                #, color="firebrick"
+                )
 
     if target is not None:
         Xt = target[:,0]
         Yt = target[:,1]
         Zt = target[:,2]
-        ax.plot(Xt, Yt, Zt, label=f"{label}, target", color="darkgreen")
+        ax.plot(Xt, Yt, Zt, label=f"{label}, target"
+                #, color="darkgreen"
+                )
 
-    plt.legend()
-    plt.gca().set_aspect('equal')
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(title)
-    if showplot:
+    if end_plotting:
+        plt.legend()
+        plt.gca().set_aspect('equal')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_title(title)
         plt.show()

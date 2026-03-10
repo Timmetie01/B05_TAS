@@ -77,7 +77,7 @@ class Data:
             data = calculations.num_derivative(data, self.frequency, axis)
         return data
     
-    def plot_3D(self, component, default=True, filtered=False, window_size=1, target=False, showplot=True, dimensions=(True, True, True)):
+    def plot_3D(self, component, default=True, filtered=False, window_size=1, target=False, start_plotting=True, end_plotting=True, dimensions=(True, True, True)):
         '''
         Creates a 3d plot of positional or rotational data
 
@@ -102,7 +102,7 @@ class Data:
         '''
         target_data = None
         print(data)
-        graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', showplot=showplot)
+        graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', start_plotting=start_plotting, end_plotting=end_plotting)
 
 
 
