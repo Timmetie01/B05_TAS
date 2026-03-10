@@ -62,7 +62,10 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
         X = data[:,0]
         Y = data[:,1]
         Z = data[:,2]
-        ax.plot(X, Y, Z, label=label
+        ax.plot(X, Y, Z, 
+                   #c=np.arange(len(X)), cmap='rainbow', 
+                   
+                   label=label
                 #, color="darkblue"
                 )
         
@@ -78,7 +81,7 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
         Xt = target[:,0]
         Yt = target[:,1]
         Zt = target[:,2]
-        ax.plot(Xt, Yt, Zt, label=f"{label}, target"
+        ax.plot(Xt, Yt, Zt, label=f"Arm target position"
                 #, color="darkgreen"
                 )
 

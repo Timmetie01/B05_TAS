@@ -17,8 +17,7 @@ class Data:
             print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
         elif data_type[:-1] == "take_00":
             data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
-            targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv", header_size=0, right_cutoff=0)
-
+            #targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv", header_size=0, right_cutoff=0)
 
             #Frame number must be an integer:
             self.frame = np.int64(np.array([data[:,0]]))
@@ -34,6 +33,9 @@ class Data:
             self.arm_rotation_rad = self.arm_rotation_deg * np.pi / 180
             self.arm_position = np.array(data[:,11:14])
             self.frequency = 20  #Hz
+
+
+            self.target_positions = data_import.get_target_position(self, data_type)
 
         else:
             print("Choose available data type!")
@@ -97,10 +99,8 @@ class Data:
             component = 'arm_rotation_deg'
         data = self.data_selection(component)
         filtered_data = filters.moving_averages(data, window_size, 0, 'mirror')  if filtered else None
-        '''
-        target_data = self.??? if target else None
-        '''
-        target_data = None
+        
+        target_data = self.target_positions if target else None
         print(data)
         graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', start_plotting=start_plotting, end_plotting=end_plotting)
 
