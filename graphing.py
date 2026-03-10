@@ -48,22 +48,28 @@ def test_filter(filtered_data, input_data, difference=False, truth=None, discret
 
     return None
 
-def trajectory_3d_plot(data, target=None, label=None, title=None, showplot=True):
+def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, True, True), label=None, title=None, showplot=True):
     ax = plt.figure().add_subplot(projection='3d')
-    X = data[:,0]
-    Y = data[:,1]
-    Z = data[:,2]
+    if data is not None:
+        X = data[:,0]
+        Y = data[:,1]
+        Z = data[:,2]
+        ax.plot(X, Y, Z, label=label, color="darkblue")
+    
+    if filtered is not None:
+        Xf = filtered[:,0]
+        Yf = filtered[:,1]
+        Zf = filtered[:,2]
+        ax.plot(Xf, Yf, Zf, label=f"{label}, filtered", color="firebrick")
 
-    ax.plot(X, Y, Z, label=label, color="darkblue")
-
-
-    if target != None:
+    if target is not None:
         Xt = target[:,0]
         Yt = target[:,1]
         Zt = target[:,2]
-        ax.plot(Xt, Yt, Zt, label=f"{label}, target", color="firebrick")
+        ax.plot(Xt, Yt, Zt, label=f"{label}, target", color="darkgreen")
 
     plt.legend()
+    plt.gca().set_aspect('equal')
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')

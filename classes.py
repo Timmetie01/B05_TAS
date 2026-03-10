@@ -16,8 +16,8 @@ class Data:
             self.frequency = 350 #Hz
             print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
         elif data_type[:-1] == "take_00":
-            data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv")
-            targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv")
+            data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
+            targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv", header_size=0, right_cutoff=0)
 
 
             #Frame number must be an integer:
@@ -77,28 +77,32 @@ class Data:
             data = calculations.num_derivative(data, self.frequency, axis)
         return data
     
-    def plot_3D(self, component, target=True, showplot=True):
+    def plot_3D(self, component, default=True, filtered=False, window_size=1, target=False, showplot=True, dimensions=(True, True, True)):
         '''
         Creates a 3d plot of positional or rotational data
 
         :param component: Either 'base_position', 'base_rotation', 'arm_position' or 'arm_rotation'
+        :param  default: Boolean, decides if the raw data should be plotted
+        :param  filtered: Boolean, decides if the ma_filtered data should be plotted
+        :param window_size: Integer, used when filtered=True to set window width of moving averages filter
+        :param  target: Boolean, decides if the target data should be plotted
         :param showplot: True calls plt.show(). False doesnt, and it will thus be layered under the next plot created
+        :param dimensions: 
         '''
         import graphing
+        import filters
         if component == 'base_rotation':
             component = 'base_rotation_deg'
         elif component == 'arm_rotation':
             component = 'arm_rotation_deg'
         data = self.data_selection(component)
+        filtered_data = filters.moving_averages(data, window_size, 0, 'mirror')  if filtered else None
         '''
-        if target:
-
-        else:
-            target = None
+        target_data = self.??? if target else None
         '''
-        target = None
-
-        graphing.trajectory_3d_plot(data, target=target, label=f'{component}', showplot=showplot)
+        target_data = None
+        print(data)
+        graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', showplot=showplot)
 
 
 
