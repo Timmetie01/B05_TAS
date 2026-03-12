@@ -17,7 +17,6 @@ class Data:
             print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
         elif data_type[:-1] == "take_00":
             data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
-            #targets = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv", header_size=0, right_cutoff=0)
 
             #Frame number must be an integer:
             self.frame = np.int64(np.array([data[:,0]]))
