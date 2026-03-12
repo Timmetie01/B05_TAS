@@ -12,10 +12,9 @@ def num_derivative(input_array, frequency, axis=0):
 
     :return output_array: The array of derivatives, structured similarly to the input_array
     '''
-    t0 = time.time()
     if input_array.ndim > 2:
         print('More than 2 dimensions not implemented for derivative...')
-        quit()
+        raise ValueError
 
     if axis == 1:
         input_array = np.transpose(input_array)
@@ -32,6 +31,5 @@ def num_derivative(input_array, frequency, axis=0):
     if axis == 1:
         output_array = np.transpose(output_array)
 
-    print(time.time() - t0)
     return output_array
     

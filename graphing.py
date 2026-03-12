@@ -26,7 +26,7 @@ def test_filter(filtered_data, input_data, difference=False, truth=None, discret
 
     if filtered_data.ndim > 2 or input_data.ndim != filtered_data.ndim:
         print('You shouldn\'t input higher than 2 dimensional array, and array dimensions should be the same for filtered and input data.')
-        quit()
+        raise ValueError
 
     for i in range(len(filtered_data[0,:])):
         plt.plot(np.arange(0, len(filtered_data[:,i]), 1) + filter_shift, filtered_data[:,i], label='Filtered data', color='darkblue')
@@ -48,14 +48,9 @@ def test_filter(filtered_data, input_data, difference=False, truth=None, discret
 
     return None
 
-def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, True, True), label=None, title=None, start_plotting=True, end_plotting=True):
-    if start_plotting:
-        #Since you might want to plot different things on top of each other, making this a global variable ensures it can be called in different functions
-        global ax
-        if dimensions == (True, True, True):
-            ax = plt.figure().add_subplot(projection='3d')   
-        if dimensions == (True, True, False) or dimensions == (True, False, True) or dimensions == (False, True, True):
-            ax = plt.figure().add_subplot()
+def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, True, True), label=None, title=None, showplot=True):
+    ax = get_ax(dimensions)
+        
 
 
     if data is not None:
@@ -84,7 +79,7 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
                 #, color="darkgreen"
                 )
 
-    if end_plotting:
+    if showplot:
         plt.legend()
         plt.gca().set_aspect('equal')
         ax.set_xlabel('X')
@@ -92,3 +87,15 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
         ax.set_zlabel('Z')
         ax.set_title(title)
         plt.show()
+
+def get_ax(XYZ=(True, True, True)):
+    fig = plt.gcf()
+
+    if fig.axes:           # if axis already exists, return it
+        return fig.axes[0]
+
+    if XYZ == (True, True, True):
+        return fig.add_subplot(111, projection="3d")
+    else:
+        return fig.add_subplot(111)
+    

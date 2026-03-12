@@ -56,7 +56,7 @@ class Data:
             data = self.arm_rotation_rad  
         else:
             print("Choose available data to take derivative from!")
-            quit()
+            raise ValueError
         return data
     
     
@@ -79,7 +79,7 @@ class Data:
             data = calculations.num_derivative(data, self.frequency, axis)
         return data
     
-    def plot_3D(self, component, default=True, filtered=False, window_size=1, target=False, start_plotting=True, end_plotting=True, dimensions=(True, True, True)):
+    def plot_3D(self, component, default=True, filtered=False, window_size=1, target=False, showplot=True):
         '''
         Creates a 3d plot of positional or rotational data
 
@@ -101,6 +101,78 @@ class Data:
         filtered_data = filters.moving_averages(data, window_size, 0, 'mirror')  if filtered else None
         
         target_data = self.target_positions if target else None
-        print(data)
-        graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', start_plotting=start_plotting, end_plotting=end_plotting)
+        graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', showplot=showplot)
+
+    def plot_operations(self, component, operations, XYZ=(True, True, True), showplot=True, title='no_title', label='no_label', color=None):
+        '''
+        A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
+
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg' or 'arm_rotation_rad'
+        :param operations: a tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x'. 
+        Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') for a filtered second order derivative of filtered data.
+        TUPLES ALSO NEED A COMMA AFTER THEIR LAST ENTRY!
+        :param XYZ: a tuple of booleans representing each axis. Select all 3 for a 3d plot, select 2 out of 3 for a 2d plot in that plane.
+        :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
+        '''
+        import filters
+        import calculations
+        import graphing
+        import matplotlib.pyplot as plt
+        data = self.data_selection(component)
+
+        
+
+
+        #Loop through the operations tuple, and perform each one.
+        for i in operations:
+            if i[0:10] == 'ma_filter_':
+                data = filters.moving_averages(data, int(i[10:]))
+            elif i[0:11] == 'derivative_':
+                n = int(i[11:])
+                for j in range(n):
+                    data = calculations.num_derivative(data, self.frequency)
+            else:
+                print('Choose allowed operation, read the docstring for more information!')
+                raise ValueError
+        
+
+        #There's likely a smarter way to do this but this is easy
+        if XYZ == (True, True, True):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(data[:,0], data[:,1], data[:,2], label=label, color=color)
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+
+        elif XYZ == (True, True, False) :
+            ax = graphing.get_ax(XYZ)
+            ax.plot(data[:,0], data[:,1], label=label, color=color)
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+        
+        elif XYZ == (True, False, True):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(data[:,0], data[:,2], label=label, color=color)
+            ax.set_xlabel('X')
+            ax.set_ylabel('Z')
+
+        elif XYZ == (False, True, True):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(data[:,1], data[:,2], label=label, color=color)
+            ax.set_xlabel('Y')
+            ax.set_ylabel('Z')
+
+        else:
+            print('Choose correct plot dimensions, either 3d or 2d allowed.')
+            raise ValueError
+        
+        ax.set_title(title)
+
+        if showplot:
+            plt.gca().set_aspect('equal')
+            plt.show()
+
+
+
+
 
