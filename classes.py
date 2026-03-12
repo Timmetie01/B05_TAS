@@ -110,17 +110,22 @@ class Data:
         A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
-        :param operations: a tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x'. 
-        Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') for a filtered second order derivative of filtered data.
-        TUPLES ALSO NEED A COMMA AFTER THEIR LAST ENTRY!
-        :param XYZ: a tuple of booleans representing each axis. Select all 3 for a 3d plot, select 2 out of 3 for a 2d plot in that plane.
+        :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') for a filtered second order derivative of filtered data. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
+        :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane. Example (True, True, True) for 3d, (True, False, True) for X-Z plot
         :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
+        :param title: Specify a title (string) for the plot
+        :param label: Give the thing you're currently plotting a name in the legend
+        :param color: This one should be obvious. Preferred colors: 'darkblue', 'firebrick', 'darkgreen'. If more are needed make sure they are well visible and distinct.     
+        
         '''
         import filters
         import calculations
         import graphing
         import matplotlib.pyplot as plt
         data = self.data_selection(component)
+
+        if type(component) is not tuple:
+            component = (component,)
 
         #Loop through the operations tuple, and perform each one.
         for i in operations:
@@ -131,7 +136,7 @@ class Data:
                 for j in range(n):
                     data = calculations.num_derivative(data, self.frequency)
             else:
-                print('Choose allowed operation, read the docstring for more information!')
+                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!**\t**\n\t\tAre you sure you made the operations a tuple by adding a comma?\n')
                 raise ValueError
         
 
@@ -154,6 +159,7 @@ class Data:
             ax.plot(data[:,0], data[:,2], label=label, color=color)
             ax.set_xlabel('X')
             ax.set_ylabel('Z')
+            ax.xaxis.set_inverted(True)
 
         elif XYZ == (False, True, True):
             ax = graphing.get_ax(XYZ)
