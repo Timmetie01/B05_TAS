@@ -21,6 +21,8 @@ def get_target_position(data_class, data_type):
         r = 1600
     elif data_type == 'take_002' or data_type == 'take_003' or data_type == 'take_004':
         r = 2000
+    elif data_type == 'take_005':
+        r = 100000
 
     target_pos[:,0] = r * (np.cos(angle_arr) - 1)
     target_pos[:,2] = r * ( -1 * np.sin(angle_arr))

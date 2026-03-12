@@ -54,6 +54,8 @@ class Data:
             data = self.arm_rotation_deg  
         elif component == 'arm_rotation_rad':
             data = self.arm_rotation_rad  
+        elif component == 'target':
+            data = self.target_positions
         else:
             print("Choose available data to take derivative from!")
             raise ValueError
@@ -65,7 +67,7 @@ class Data:
         '''
         Calculates the n'th derivative of the position. 
 
-        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg' or 'arm_rotation_rad'
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or target
         :param n: The order of the derivative
         :param axis: Along which axis the data matrix should be derived. Defaults to 0, which should almost always be correct.
         '''
@@ -103,11 +105,11 @@ class Data:
         target_data = self.target_positions if target else None
         graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', showplot=showplot)
 
-    def plot_operations(self, component, operations, XYZ=(True, True, True), showplot=True, title='no_title', label='no_label', color=None):
+    def plot_operations(self, component, operations, XYZ=(True, True, True), showplot=True, title=None, label='no_label', color=None):
         '''
         A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
 
-        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg' or 'arm_rotation_rad'
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
         :param operations: a tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x'. 
         Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') for a filtered second order derivative of filtered data.
         TUPLES ALSO NEED A COMMA AFTER THEIR LAST ENTRY!
@@ -119,9 +121,6 @@ class Data:
         import graphing
         import matplotlib.pyplot as plt
         data = self.data_selection(component)
-
-        
-
 
         #Loop through the operations tuple, and perform each one.
         for i in operations:
@@ -169,9 +168,11 @@ class Data:
         ax.set_title(title)
 
         if showplot:
-            plt.gca().set_aspect('equal')
-            plt.show()
 
+            plt.gca().set_aspect('equal')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
 
 
 
