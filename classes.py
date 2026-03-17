@@ -10,6 +10,7 @@ class Data:
 
         :param data_type: Specify which data to use. Either "test", or "take_00x" where x in [1,5] 
         '''
+        self.data_type = data_type
         if data_type == "test":
             self.position = data_import.get_velocity_test_data()
             self.frequency = 350 #Hz
@@ -109,11 +110,29 @@ class Data:
         A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
-        :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x' (x is degree of derivative), None/'None'/'none'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
+        
+        
+        :param operations: A tuple of operations in the order you want them executed. \n
+        Possiblities: \n
+        'ma_filter_x' (x is window width), \n
+        'derivative_x' (x is degree of derivative), \n
+        None/'None'/'none' for nothing (i.e. placeholder), \n
+        'threshold_filter_AB' (A is component (X, Y or Z), B is which derivative you want to use for the filter array (so use 1 if you want it filtered relative to velocity). \n
+        Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11.
+        
+        
         :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane, 1 True and 2 False for a single component vs time plot. Example (True, True, True) for 3d, (True, False, True) for X-Z plot, (True, False, False) for X-time plot.
+        
+        
         :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
+        
+        
         :param title: Specify a title (string) for the plot
+        
+        
         :param label: Give the thing you're currently plotting a name in the legend
+        
+        
         :param color: This one should be obvious. Preferred colors: 'darkblue', 'firebrick', 'darkgreen'. If more are needed make sure they are well visible and distinct.     
         
         '''
@@ -122,6 +141,8 @@ class Data:
         import graphing
         import matplotlib.pyplot as plt
         data = self.data_selection(component)
+        starting_data = data
+        
 
 
         if type(operations) is not tuple:
@@ -131,11 +152,28 @@ class Data:
         for i in operations:
             if i[0:10] == 'ma_filter_':
                 data = filters.moving_averages(data, int(i[10:]))
+
             elif i[0:11] == 'derivative_':
                 n = int(i[11:])
                 for j in range(n):
                     data = calculations.num_derivative(data, self.frequency)
-            
+
+            elif i[0:17] == 'threshold_filter_':
+                component = 0 if i[17] == 'X' else 1 if i[17] == 'Y' else 2 if i[17] == 'Z' else 3
+                if component == 3:
+                    raise ValueError
+                
+                filtering_array = 
+                for i in int(i[18]):
+                    filtering_array = calculations.num_derivative(filtering_array, self.frequency)
+
+                
+                
+                
+
+                filters.threshold_filter(self, data)
+
+
 
             elif i == None or i == 'None' or i == 'none':
                 continue
