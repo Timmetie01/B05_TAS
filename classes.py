@@ -1,5 +1,6 @@
 import numpy as np
 import time
+import data_import
 
 
 class Data:
@@ -10,12 +11,12 @@ class Data:
         :param data_type: Specify which data to use. Either "test", or "take_00x" where x in [1,5]
         
         '''
-        import data_import
         if data_type == "test":
             self.position = data_import.get_velocity_test_data()
             self.frequency = 350 #Hz
             print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
         elif data_type[:-1] == "take_00":
+            #WARNING: Due to how stored numpy arrays are implemented, the header size will not work there, but must be manually set in data_import.py 
             data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
 
             #Frame number must be an integer:
@@ -109,7 +110,7 @@ class Data:
         A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
-        :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') for a filtered second order derivative of filtered data. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
+        :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x' (x is degree of derivative), None/'None'/'none'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
         :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane. Example (True, True, True) for 3d, (True, False, True) for X-Z plot
         :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
         :param title: Specify a title (string) for the plot
@@ -123,9 +124,10 @@ class Data:
         import matplotlib.pyplot as plt
         data = self.data_selection(component)
 
-        if type(component) is not tuple:
-            component = (component,)
 
+        if type(operations) is not tuple:
+            operations = (operations,)
+        
         #Loop through the operations tuple, and perform each one.
         for i in operations:
             if i[0:10] == 'ma_filter_':
@@ -134,10 +136,12 @@ class Data:
                 n = int(i[11:])
                 for j in range(n):
                     data = calculations.num_derivative(data, self.frequency)
+            elif i == None or i == 'None' or i == 'none':
+                continue
             else:
-                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!**\t**\n\t\tAre you sure you made the operations a tuple by adding a comma?\n')
+                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!**\t**\n\n')
                 raise ValueError
-        
+
 
         #There's likely a smarter way to do this but this is easy
         if XYZ == (True, True, True):
@@ -170,10 +174,10 @@ class Data:
             print('Choose correct plot dimensions, either 3d or 2d allowed.')
             raise ValueError
         
-        ax.set_title(title)
+        if title is not None:
+            ax.set_title(title)
 
         if showplot:
-
             plt.gca().set_aspect('equal')
             plt.legend()
             plt.grid(True)

@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+stored_numpy_arrays = np.load("AE2224-I_dataset/saved_data.npz", allow_pickle=True)
+
 def get_velocity_test_data():
     #For reference: importing 250k test datapoints in a 1d array takes approximately 0.0364 seconds.
     raise NotImplementedError
@@ -8,9 +10,13 @@ def get_velocity_test_data():
     return pd.DataFrame.to_numpy(data)
 
 def get_data(filepath, header_size=0, right_cutoff=0):
-    #Importing take 4 takes approximately 0.5 seconds. Optimization will be done later on, since this is too long.
-    data = pd.read_csv(filepath)
-    return pd.DataFrame.to_numpy(data)[header_size:,:-1 * right_cutoff]
+    #If the user requests data stored in a numpy array, return that. If not, return file like normal
+    if filepath[:24] == 'AE2224-I_dataset/take_00':
+        index = f'take_00{filepath[24]}' 
+        return stored_numpy_arrays[index]
+    else:
+        data = pd.read_csv(filepath)
+        return pd.DataFrame.to_numpy(data)[header_size:,:-1 * right_cutoff]
 
 def get_target_position(data_class, data_type):
     start_pos = data_class.arm_position[0,:]
@@ -30,3 +36,26 @@ def get_target_position(data_class, data_type):
     target_pos += start_pos
     
     return target_pos
+
+def save_data_arrays(header_size=0, right_cutoff=0):
+    take_001 = pd.read_csv(f"AE2224-I_dataset/take_001.csv")
+    take_001 = pd.DataFrame.to_numpy(take_001)
+    take_002 = pd.read_csv(f"AE2224-I_dataset/take_002.csv")
+    take_002 = pd.DataFrame.to_numpy(take_002)
+    take_003 = pd.read_csv(f"AE2224-I_dataset/take_003.csv")
+    take_003 = pd.DataFrame.to_numpy(take_003)
+    take_004 = pd.read_csv(f"AE2224-I_dataset/take_004.csv")
+    take_004 = pd.DataFrame.to_numpy(take_004)
+    take_005 = pd.read_csv(f"AE2224-I_dataset/take_005.csv")
+    take_005 = pd.DataFrame.to_numpy(take_005)
+
+    np.savez("AE2224-I_dataset/saved_data", 
+                take_001=take_001[header_size:,:-1 * right_cutoff],
+                take_002=take_002[header_size:,:-1 * right_cutoff], 
+                take_003=take_003[header_size:,:-1 * right_cutoff], 
+                take_004=take_004[header_size:,:-1 * right_cutoff], 
+                take_005=take_005[header_size:,:-1 * right_cutoff])
+
+#When we get corrected or different data or something, the function below must be executed to renew saved numpy arrays
+#save_data_arrays(5, 10)
+    
