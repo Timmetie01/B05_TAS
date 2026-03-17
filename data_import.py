@@ -4,10 +4,9 @@ import numpy as np
 stored_numpy_arrays = np.load("AE2224-I_dataset/saved_data.npz", allow_pickle=True)
 
 def get_velocity_test_data():
-    #For reference: importing 250k test datapoints in a 1d array takes approximately 0.0364 seconds.
+    #For reference: importing 250k test datapoints in a 1d array takes approximately 0.0364 seconds
+    print("The velocity test data is outdated. Use the actual experiments pls")
     raise NotImplementedError
-    data = pd.read_csv("Velocitydatatest.csv")
-    return pd.DataFrame.to_numpy(data)
 
 def get_data(filepath, header_size=0, right_cutoff=0):
     #If the user requests data stored in a numpy array, return that. If not, return file like normal
