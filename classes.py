@@ -163,22 +163,18 @@ class Data:
                 if component == 3:
                     raise ValueError
                 
-                filtering_array = 
-                for i in int(i[18]):
+                filtering_array = np.transpose(np.array([starting_data[:,component]]))
+                filtering_array = filters.moving_averages(filtering_array, 21)
+                for j in range(int(i[18])):
                     filtering_array = calculations.num_derivative(filtering_array, self.frequency)
 
+                #A horribly coded way to pass details through to the next function, sorry...
+                data = filters.threshold_filter(self, data, filtering_array, component=f"{i[17:19]}{"bp" if component == "base_position" else "ap" if component == "arm_position" else "ar" if component  == "arm_rotation_deg" or component == "arm_rotation_rad" else "br" if component  == "base_rotation_deg" or component == "base_rotation_rad" else "ar"}")
                 
-                
-                
-
-                filters.threshold_filter(self, data)
-
-
-
             elif i == None or i == 'None' or i == 'none':
                 continue
             else:
-                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!**\t**\n\n')
+                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!\t**\t**\n\n')
                 raise ValueError
 
 
@@ -215,19 +211,19 @@ class Data:
 
         elif XYZ == (True, False, False):
             ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,0]))/self.frequency, data[:,0])
+            ax.plot(np.arange(len(data[:,0]))/self.frequency, data[:,0], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('X')
 
         elif XYZ == (False, True, False):
             ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,1]))/self.frequency, data[:,1])
+            ax.plot(np.arange(len(data[:,1]))/self.frequency, data[:,1], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('Y')
 
         elif XYZ == (False, False, True):
             ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,2]))/self.frequency, data[:,2])
+            ax.plot(np.arange(len(data[:,2]))/self.frequency, data[:,2], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('Z')
 
