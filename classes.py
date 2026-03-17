@@ -110,7 +110,7 @@ class Data:
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
         :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x' (x is degree of derivative), None/'None'/'none'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
-        :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane. Example (True, True, True) for 3d, (True, False, True) for X-Z plot
+        :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane, 1 True and 2 False for a single component vs time plot. Example (True, True, True) for 3d, (True, False, True) for X-Z plot, (True, False, False) for X-time plot.
         :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
         :param title: Specify a title (string) for the plot
         :param label: Give the thing you're currently plotting a name in the legend
