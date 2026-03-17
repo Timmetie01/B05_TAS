@@ -8,13 +8,12 @@ class Data:
         '''
         Sets up the data class for one of the measurement runs. 
 
-        :param data_type: Specify which data to use. Either "test", or "take_00x" where x in [1,5]
-        
+        :param data_type: Specify which data to use. Either "test", or "take_00x" where x in [1,5] 
         '''
         if data_type == "test":
             self.position = data_import.get_velocity_test_data()
             self.frequency = 350 #Hz
-            print("Many things have changed since the last time the test data was used. It probably won't work anymore...")
+            
         elif data_type[:-1] == "take_00":
             #WARNING: Due to how stored numpy arrays are implemented, the header size will not work there, but must be manually set in data_import.py 
             data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
@@ -111,7 +110,7 @@ class Data:
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
         :param operations: A tuple of operations in the order you want them executed. Possiblities: 'ma_filter_x' (x is window width), 'derivative_x' (x is degree of derivative), None/'None'/'none'. Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11. Since it must be a tuple, if you only have one argument it must have a comma after it, i.e. (ma_filter_11,)
-        :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane. Example (True, True, True) for 3d, (True, False, True) for X-Z plot
+        :param XYZ: A tuple of booleans representing each axis. Set True all 3 for a 3d plot, select 2 out of 3 True and the other False for a 2d plot in that plane, 1 True and 2 False for a single component vs time plot. Example (True, True, True) for 3d, (True, False, True) for X-Z plot, (True, False, False) for X-time plot.
         :param showplot: Decide wether to show the plot or not. When not shown, you can fall this function again to plot something else on top of the previous plot.
         :param title: Specify a title (string) for the plot
         :param label: Give the thing you're currently plotting a name in the legend
@@ -136,6 +135,8 @@ class Data:
                 n = int(i[11:])
                 for j in range(n):
                     data = calculations.num_derivative(data, self.frequency)
+            
+
             elif i == None or i == 'None' or i == 'none':
                 continue
             else:
@@ -150,12 +151,14 @@ class Data:
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             ax.set_zlabel('Z')
+            plt.gca().set_aspect('equal')
 
-        elif XYZ == (True, True, False) :
+        elif XYZ == (True, True, False):
             ax = graphing.get_ax(XYZ)
             ax.plot(data[:,0], data[:,1], label=label, color=color)
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
+            plt.gca().set_aspect('equal')
         
         elif XYZ == (True, False, True):
             ax = graphing.get_ax(XYZ)
@@ -163,11 +166,31 @@ class Data:
             ax.set_xlabel('X')
             ax.set_ylabel('Z')
             ax.xaxis.set_inverted(True)
+            plt.gca().set_aspect('equal')
 
         elif XYZ == (False, True, True):
             ax = graphing.get_ax(XYZ)
             ax.plot(data[:,1], data[:,2], label=label, color=color)
             ax.set_xlabel('Y')
+            ax.set_ylabel('Z')
+            plt.gca().set_aspect('equal')
+
+        elif XYZ == (True, False, False):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(np.arange(len(data[:,0]))/self.frequency, data[:,0])
+            ax.set_xlabel('time (s)')
+            ax.set_ylabel('X')
+
+        elif XYZ == (False, True, False):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(np.arange(len(data[:,1]))/self.frequency, data[:,1])
+            ax.set_xlabel('time (s)')
+            ax.set_ylabel('Y')
+
+        elif XYZ == (False, False, True):
+            ax = graphing.get_ax(XYZ)
+            ax.plot(np.arange(len(data[:,2]))/self.frequency, data[:,2])
+            ax.set_xlabel('time (s)')
             ax.set_ylabel('Z')
 
         else:
@@ -178,7 +201,7 @@ class Data:
             ax.set_title(title)
 
         if showplot:
-            plt.gca().set_aspect('equal')
+
             plt.legend()
             plt.grid(True)
             plt.show()
