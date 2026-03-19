@@ -105,7 +105,7 @@ class Data:
         target_data = self.target_positions if target else None
         graphing.trajectory_3d_plot(data if default else None, target=target_data, filtered=filtered_data, label=f'{component}', showplot=showplot)
 
-    def plot_operations(self, component, operations, XYZ=(True, True, True), showplot=True, title=None, label='no_label', color=None):
+    def plot_operations(self, component, operations, XYZ=(True, True, True), showplot=True, title=None, label='no_label', color=None, custom_axis_label=(None, None, None)):
         '''
         A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
 
@@ -117,7 +117,7 @@ class Data:
         'ma_filter_x' (x is window width), \n
         'derivative_x' (x is degree of derivative), \n
         None/'None'/'none' for nothing (i.e. placeholder), \n
-        'threshold_filter_AB' (A is component (X, Y or Z), B is which derivative you want to use for the filter array (so use 1 if you want it filtered relative to velocity). \n
+        'threshold_filter_AB' (A is component (X, Y or Z), B is which derivative you want to use for the filter array (so use 1 if you want it filtered relative to velocity (which you should)). \n
         Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11.
         
         
@@ -135,6 +135,7 @@ class Data:
         
         :param color: This one should be obvious. Preferred colors: 'darkblue', 'firebrick', 'darkgreen'. If more are needed make sure they are well visible and distinct.     
         
+        :param custom_axis_label: (str, str, str) Custom axis labels in order XYZ. Default None gives automatic labels. Can only be used in the same function call as where the plot is shown, otherwise the next plot will overwrite the custom labels.
         '''
         import filters
         import calculations
@@ -168,7 +169,7 @@ class Data:
                 for j in range(int(i[18])):
                     filtering_array = calculations.num_derivative(filtering_array, self.frequency)
 
-                #A horribly coded way to pass details through to the next function, sorry...
+                #A horribly coded way to pass details through to the next function:
                 data = filters.threshold_filter(self, data, filtering_array, component=f"{i[17:19]}{"bp" if component == "base_position" else "ap" if component == "arm_position" else "ar" if component  == "arm_rotation_deg" or component == "arm_rotation_rad" else "br" if component  == "base_rotation_deg" or component == "base_rotation_rad" else "ar"}")
                 
             elif i == None or i == 'None' or i == 'none':
@@ -231,13 +232,16 @@ class Data:
             print('Choose correct plot dimensions, either 3d or 2d allowed.')
             raise ValueError
         
-        if title is not None:
-            ax.set_title(title)
+        if title is not None: ax.set_title(title)
 
+        if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+        if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
+        if custom_axis_label[2] is not None: ax.set_zlabel(custom_axis_label[2])
+        
         if showplot:
-
+            
             plt.legend()
-            plt.grid(True)
+            plt.grid(True, ls='--')
             plt.show()
 
 
