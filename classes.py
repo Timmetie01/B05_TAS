@@ -17,8 +17,9 @@ class Data:
             
         elif data_type[:-1] == "take_00":
             #WARNING: Due to how stored numpy arrays are implemented, the header size will not work there, but must be manually set in data_import.py 
-            data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv", header_size=5, right_cutoff=10)
-
+            data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv")
+            input_file = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv")
+            
             #Frame number must be an integer:
             self.frame = np.int64(np.array([data[:,0]]))
             
@@ -34,8 +35,15 @@ class Data:
             self.arm_position = np.array(data[:,11:14])
             self.frequency = 20  #Hz
 
+            self.base_movement = np.array(input_file[:,1:4])
+            self.arm_joint_targets = np.array(input_file[:,4:10])
+            self.maneuver_duration = np.array(np.transpose([input_file[:,10]]))
+            self.unknown_boolean_flag = np.array(np.transpose([input_file[:,11]]))
 
             self.target_positions = data_import.get_target_position(self, data_type)
+
+            self.maneuver_start_index, self.maneuver_end_index = self.maneuver_start_end()
+            self.maneuver_start_index, self.maneuver_end_index = np.asarray(np.round(self.maneuver_start_index * self.frequency), dtype=int), np.asarray(np.round(self.maneuver_end_index * self.frequency), dtype=int)
 
         else:
             print("Choose available data type!")
@@ -61,7 +69,34 @@ class Data:
             raise ValueError
         return data
     
-    
+    def maneuver_start_end(self, stop_duration=1):
+
+        if self.data_type == 'take_001': start_offset = 1.85
+        elif self.data_type == 'take_002': start_offset = 6.75
+        elif self.data_type == 'take_003': start_offset = 8.15
+        elif self.data_type == 'take_004': start_offset = 2.7
+        elif self.data_type == 'take_005': start_offset = 4.2
+        else: start_offset = 0
+
+
+        start_list = np.array([0])
+        end_list = np.array([])
+        for i in self.maneuver_duration[:,0]:
+
+            if self.data_type == 'take_004' and i == 10:
+                end_list = np.append(end_list, start_list[-1] + i + 0.025)
+            else: 
+                end_list = np.append(end_list, start_list[-1] + i)
+            
+            start_list = np.append(start_list, end_list[-1] +  stop_duration)
+
+        end_list = np.append(end_list, self.maneuver_duration[-1,0])
+
+        start_list += start_offset
+        end_list += start_offset
+
+
+        return start_list, end_list
 
     def general_derivative(self, component, n, axis=0):
         '''
@@ -135,6 +170,7 @@ class Data:
         
         :param color: This one should be obvious. Preferred colors: 'darkblue', 'firebrick', 'darkgreen'. If more are needed make sure they are well visible and distinct.     
         
+
         :param custom_axis_label: (str, str, str) Custom axis labels in order XYZ. Default None gives automatic labels. Can only be used in the same function call as where the plot is shown, otherwise the next plot will overwrite the custom labels.
         '''
         import filters
@@ -179,6 +215,60 @@ class Data:
                 raise ValueError
 
 
+        self.plot_different_dimensions(data, XYZ, color, label, title, custom_axis_label)
+        
+        
+        
+        if showplot:
+            
+            plt.legend()
+            plt.grid(True, ls='--')
+            plt.show()
+
+
+
+    def plot_maneuver_duration(self,  ymin, ymax, stop_duration=1):
+        import matplotlib.pyplot as plt
+
+        start_list, end_list = self.maneuver_start_end(stop_duration)
+
+        plt.vlines(start_list, ymin, ymax, color='green', label='Start maneuver')
+        plt.vlines(end_list, ymin, ymax, color='red', label='End maneuver')
+
+
+    def waypoint_positions(self, margin_from_maneuver=3):
+    
+        arm_waypoint_locations = list([self.arm_position[0,:]])
+        for s, e in zip(self.maneuver_start_index[1:], self.maneuver_end_index[:]):
+            
+            arm_waypoint_locations.append(np.average(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
+            
+        return np.array(arm_waypoint_locations)
+    
+    def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', color='darkblue'):
+        import matplotlib.pyplot as plt
+        import graphing
+
+        waypoint_locations = self.waypoint_positions()
+        ax = graphing.get_ax(XYZ)
+
+        if type == 'scatter':
+            ax.scatter(waypoint_locations[:,0], waypoint_locations[:,1], waypoint_locations[:,2], label=label, color=color)
+        else:
+            raise ValueError
+
+
+        if showplot:
+            
+            plt.legend()
+            plt.grid(True, ls='--')
+            plt.show()
+
+
+            
+    def plot_different_dimensions(self, data, XYZ, color, label, title, custom_axis_label):
+        import graphing
+        import matplotlib.pyplot as plt
         #There's likely a smarter way to do this but this is easy
         if XYZ == (True, True, True):
             ax = graphing.get_ax(XYZ)
@@ -237,12 +327,6 @@ class Data:
         if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
         if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
         if custom_axis_label[2] is not None: ax.set_zlabel(custom_axis_label[2])
-        
-        if showplot:
-            
-            plt.legend()
-            plt.grid(True, ls='--')
-            plt.show()
 
 
 

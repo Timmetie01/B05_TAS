@@ -8,14 +8,14 @@ def get_velocity_test_data():
     print("The velocity test data is outdated. Use the actual experiments pls")
     raise NotImplementedError
 
-def get_data(filepath, header_size=0, right_cutoff=0):
+def get_data(filepath):
     #If the user requests data stored in a numpy array, return that. If not, return file like normal
     if filepath[:24] == 'AE2224-I_dataset/take_00':
         index = f'take_00{filepath[24]}' 
         return stored_numpy_arrays[index]
     else:
-        data = pd.read_csv(filepath)
-        return pd.DataFrame.to_numpy(data)[header_size:,:-1 * right_cutoff]
+        data = pd.read_csv(filepath, header=None)
+        return pd.DataFrame.to_numpy(data)
 
 def get_target_position(data_class, data_type):
     start_pos = data_class.arm_position[0,:]
@@ -36,7 +36,7 @@ def get_target_position(data_class, data_type):
     
     return target_pos
 
-def save_data_arrays(header_size=0, right_cutoff=0):
+def save_data_arrays(header_size=5, right_cutoff=10):
     take_001 = pd.read_csv(f"AE2224-I_dataset/take_001.csv")
     take_001 = pd.DataFrame.to_numpy(take_001)
     take_002 = pd.read_csv(f"AE2224-I_dataset/take_002.csv")
