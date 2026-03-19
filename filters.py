@@ -19,7 +19,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
         raise ValueError
 
     #ensuring symmetry in the window (current value, and equal amounts on left and right)
-    if window_size // 2 != 1:
+    if window_size % 2 != 1:
         window_size += 1
 
     #Transpose the data if other axis is required. Then, all code below can be the same, it just needs to be flipped back at the end of this function
@@ -63,7 +63,7 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
         filtered_data = np.transpose(filtered_data)
     return filtered_data
 
-def threshold_filter(data_class, data, filtering_array, threshold_value=-1, interpolate='linear', return_where_filtered=False, component='Y1ap'):
+def threshold_filter(data_class, data, filtering_array, threshold_value=-1, interpolate='linear'):
     '''
     Applies a threshold filter and interpolates the removed data.
 
@@ -71,120 +71,4 @@ def threshold_filter(data_class, data, filtering_array, threshold_value=-1, inte
     :param filtering_array: The array on which the threshold filter is run, to decide which lines to remove from full array
     :param threshold_value: The absolute value above which a datapoint should be removed. -1 means automatic
     :param interpolate: the interpolation type, 'linear'
-    :param return_where_filtered: When true, this function also returns the array of booleans that indicate where values have been filtered.
-    :param component: The component currently taken as filtered array used to set thresholds, X0ap (X, Y, Z) direction + (0, 1, ...) derivative + (a, b) arm or base + (p, r) position or rotation
     '''
-    
-    if threshold_value == -1:
-        data_type = data_class.data_type
-        if data_type == 'take_001': 
-            if   component == 'X1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ap': threshold_value = (2.5, -2.5)
-            elif component == 'X1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ar': threshold_value = (2.5, -2.5)
-            elif component == 'X1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Y1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Z1bp': threshold_value = (2.5, -2.5)
-            elif component == 'X1br': threshold_value = (2.5, -2.5)
-            elif component == 'Y1br': threshold_value = (2.5, -2.5)
-            elif component == 'Z1br': threshold_value = (2.5, -2.5) 
-        elif data_type == 'take_002': 
-            if   component == 'X1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ap': threshold_value = (2.5, -2.5)
-            elif component == 'X1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ar': threshold_value = (2.5, -2.5)
-            elif component == 'X1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Y1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Z1bp': threshold_value = (2.5, -2.5)
-            elif component == 'X1br': threshold_value = (2.5, -2.5)
-            elif component == 'Y1br': threshold_value = (2.5, -2.5)
-            elif component == 'Z1br': threshold_value = (2.5, -2.5)             
-        elif data_type == 'take_003': 
-            if   component == 'X1ap': threshold_value = (0, -2.5)
-            elif component == 'Y1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ap': threshold_value = (2.5, -2.5)
-            elif component == 'X1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ar': threshold_value = (2.5, -2.5)
-            elif component == 'X1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Y1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Z1bp': threshold_value = (2.5, -2.5)
-            elif component == 'X1br': threshold_value = (2.5, -2.5)
-            elif component == 'Y1br': threshold_value = (2.5, -2.5)
-            elif component == 'Z1br': threshold_value = (2.5, -2.5)              
-        elif data_type == 'take_004': 
-            if   component == 'X1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ap': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ap': threshold_value = (2.5, -2.5)
-            elif component == 'X1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Y1ar': threshold_value = (2.5, -2.5)
-            elif component == 'Z1ar': threshold_value = (2.5, -2.5)
-            elif component == 'X1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Y1bp': threshold_value = (2.5, -2.5)
-            elif component == 'Z1bp': threshold_value = (2.5, -2.5)
-            elif component == 'X1br': threshold_value = (2.5, -2.5)
-            elif component == 'Y1br': threshold_value = (2.5, -2.5)
-            elif component == 'Z1br': threshold_value = (2.5, -2.5)               
-        elif data_type == 'take_005': raise ValueError
-    else: threshold_value = (abs(threshold_value), -1 * abs(threshold_value))
-
-    filter_boolean = (filtering_array > threshold_value[0]) | (filtering_array < threshold_value[1])
-
-    #Converting from T/F to 1/0, and getting the elementwise difference. Also append 0 to start since the first value doesnt have a difference defined
-    filter_binary = filter_boolean.astype(int)
-    difference = np.diff(filter_binary, axis=0)
-    difference = np.insert(difference, 0, 0)
-
-    #If the difference between previous and current element is not zero, a filter is started or stopped
-    filter_start = np.where(difference == 1)[0] + 1
-    filter_end = np.where(difference == -1)[0] + 1
-
-    if filter_binary[0]:
-        filter_start = np.insert(filter_start, 0, 0)
-    if filter_binary[-1]:
-        filter_end = np.append(filter_end, len(filter_binary)-1)
-
-    #Iterate over each stretch of filtered data. Delete the parts where the filter would be applied on 50 or less datapoints
-    i = 0
-    for s, e in zip(filter_start, filter_end):
-        if e - s < 50:
-            filter_start = np.delete(filter_start, i, 0)
-            filter_end = +++np.delete(filter_end, i, 0)
-        else: i += 1
-
-    #Iterate over the stretches where there is no filter, to remove the parts where the filter momentarily turns off to avoid oscillation
-    i = 0
-    for s, e in zip(filter_start[1:], filter_end[:-1]):
-        if s - e < 80:
-            filter_start = np.delete(filter_start, i + 1, 0)
-            filter_end = np.delete(filter_end, i, 0)
-        else: i += 1
-
-    #Apply the filter and interpolate .
-    for s, e in zip(filter_start, filter_end):
-        if interpolate == 'linear':
-            for i in range(len(data[0,:])):
-
-                data[s:e,i] = np.linspace(data[s,i], data[e,i], e-s, endpoint=True)
-        else:
-            print('Only linear interpolation for threshold filter currently implemented...')
-            raise ValueError
-
-
-    if return_where_filtered:
-        return data, filter_boolean
-    else: 
-        return data
-
-
-
-    
-    
-        
-        
-    
-
