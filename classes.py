@@ -81,17 +81,31 @@ class Data:
 
         start_list = np.array([0])
         end_list = np.array([])
-        for i in self.maneuver_duration[:,0]:
+        for i, duration in enumerate(self.maneuver_duration[:,0]):
 
-            if self.data_type == 'take_004' and i == 10:
-                end_list = np.append(end_list, start_list[-1] + i + 0.025)
+
+            if self.data_type == 'take_004' and duration == 10:
+                end_list = np.append(end_list, start_list[-1] + duration + 0.025)
             else: 
-                end_list = np.append(end_list, start_list[-1] + i)
+                end_list = np.append(end_list, start_list[-1] + duration)
             
             start_list = np.append(start_list, end_list[-1] +  stop_duration)
 
+        
         end_list = np.append(end_list, self.maneuver_duration[-1,0])
+        start_list = np.delete(start_list, 0, 0)
 
+        difference = 0
+        #Remove the points halfway through a base maneuver
+        for i in range(len(start_list)-5):
+            i = i - difference
+            
+            if abs(end_list[i+1] - start_list[i] - 10) < 0.1 and abs(end_list[i+2] - start_list[i+1] - 10) < 0.1:
+                end_list = np.delete(end_list, i+1)
+                start_list = np.delete(start_list, i+1)
+                difference += 1
+                 
+        
         start_list += start_offset
         end_list += start_offset
 
@@ -239,25 +253,18 @@ class Data:
     def waypoint_positions(self, margin_from_maneuver=3):
     
         arm_waypoint_locations = list([self.arm_position[0,:]])
-        for s, e in zip(self.maneuver_start_index[1:], self.maneuver_end_index[:]):
+        for s, e in zip(self.maneuver_start_index[:], self.maneuver_end_index[:]):
             
             arm_waypoint_locations.append(np.average(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
+            print(len(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:]))
             
         return np.array(arm_waypoint_locations)
     
-    def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', color='darkblue'):
+    def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
-        import graphing
 
-        waypoint_locations = self.waypoint_positions()
-        ax = graphing.get_ax(XYZ)
-
-        if type == 'scatter':
-            ax.scatter(waypoint_locations[:,0], waypoint_locations[:,1], waypoint_locations[:,2], label=label, color=color)
-        else:
-            raise ValueError
-
-
+        self.plot_different_dimensions(self.waypoint_positions(), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
+        
         if showplot:
             
             plt.legend()
@@ -266,13 +273,19 @@ class Data:
 
 
             
-    def plot_different_dimensions(self, data, XYZ, color, label, title, custom_axis_label):
+    def plot_different_dimensions(self, data, XYZ, color, label, title, custom_axis_label, type='line'):
+        #Type is either line or scatter
         import graphing
         import matplotlib.pyplot as plt
         #There's likely a smarter way to do this but this is easy
+
+
         if XYZ == (True, True, True):
             ax = graphing.get_ax(XYZ)
-            ax.plot(data[:,0], data[:,1], data[:,2], label=label, color=color)
+            if type == 'line':
+                ax.plot(data[:,0], data[:,1], data[:,2], label=label, color=color)
+            elif type == 'scatter':
+                ax.scatter(data[:,0], data[:,1], data[:,2], label=label, color=color)
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             ax.set_zlabel('Z')
@@ -280,14 +293,20 @@ class Data:
 
         elif XYZ == (True, True, False):
             ax = graphing.get_ax(XYZ)
-            ax.plot(data[:,0], data[:,1], label=label, color=color)
+            if type == 'line':
+                ax.plot(data[:,0], data[:,1], label=label, color=color)
+            elif type == 'scatter':
+                ax.scatter(data[:,0], data[:,1], label=label, color=color)
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             plt.gca().set_aspect('equal')
         
         elif XYZ == (True, False, True):
             ax = graphing.get_ax(XYZ)
-            ax.plot(data[:,0], data[:,2], label=label, color=color)
+            if type == 'line':
+                ax.plot(data[:,0], data[:,2], label=label, color=color)
+            elif type == 'scatter':
+                ax.scatter(data[:,0], data[:,2], label=label, color=color)
             ax.set_xlabel('X')
             ax.set_ylabel('Z')
             ax.xaxis.set_inverted(True)
@@ -295,7 +314,10 @@ class Data:
 
         elif XYZ == (False, True, True):
             ax = graphing.get_ax(XYZ)
-            ax.plot(data[:,1], data[:,2], label=label, color=color)
+            if type == 'line': 
+                ax.plot(data[:,1], data[:,2], label=label, color=color)
+            elif type == 'scatter':
+                ax.scatter(data[:,1], data[:,2], label=label, color=color)
             ax.set_xlabel('Y')
             ax.set_ylabel('Z')
             plt.gca().set_aspect('equal')
