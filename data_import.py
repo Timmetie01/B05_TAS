@@ -22,13 +22,7 @@ def get_target_position(data_class, data_type):
     angle_arr = np.linspace(0, np.pi, len(data_class.arm_position[:,0]))
     target_pos = np.empty((len(angle_arr), 3))
 
-
-    if data_type == 'take_001':
-        r = 1600
-    elif data_type == 'take_002' or data_type == 'take_003' or data_type == 'take_004':
-        r = 2000
-    elif data_type == 'take_005':
-        r = 100000
+    r = data_class.r
 
     target_pos[:,0] = r * (np.cos(angle_arr) - 1)
     target_pos[:,2] = r * ( -1 * np.sin(angle_arr))

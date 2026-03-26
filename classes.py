@@ -19,6 +19,13 @@ class Data:
             #WARNING: Due to how stored numpy arrays are implemented, the header size will not work there, but must be manually set in data_import.py 
             data = data_import.get_data(f"AE2224-I_dataset/{data_type}.csv")
             input_file = data_import.get_data(f"AE2224-I_dataset/inputFile_00{data_type[-1]}.csv")
+
+            if data_type == 'take_001':
+                self.r = 1600
+            elif data_type == 'take_002' or data_type == 'take_003' or data_type == 'take_004':
+                self.r = 2000
+            elif data_type == 'take_005':
+                self.r = 100000
             
             #Frame number must be an integer:
             self.frame = np.int64(np.array([data[:,0]]))
@@ -100,7 +107,8 @@ class Data:
         for i in range(len(start_list)-5):
             i = i - difference
             
-            if abs(end_list[i+1] - start_list[i] - 10) < 0.1 and abs(end_list[i+2] - start_list[i+1] - 10) < 0.1:
+            #Any maneuver longer than 2 seconds is a base movement, and should waypoints with maneuvers longer than that before and after them should be removed. 3 is the cutoff to have some MoS from the 2
+            if abs(end_list[i+1] - start_list[i]) > 3 and abs(end_list[i+2] - start_list[i+1]) > 3:
                 end_list = np.delete(end_list, i+1)
                 start_list = np.delete(start_list, i+1)
                 difference += 1
@@ -231,8 +239,6 @@ class Data:
 
         self.plot_different_dimensions(data, XYZ, color, label, title, custom_axis_label)
         
-        
-        
         if showplot:
             
             plt.legend()
@@ -253,10 +259,9 @@ class Data:
     def waypoint_positions(self, margin_from_maneuver=3):
     
         arm_waypoint_locations = list([self.arm_position[0,:]])
-        for s, e in zip(self.maneuver_start_index[:], self.maneuver_end_index[:]):
+        for s, e in zip(self.maneuver_start_index, self.maneuver_end_index):
             
             arm_waypoint_locations.append(np.average(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
-            print(len(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:]))
             
         return np.array(arm_waypoint_locations)
     
@@ -266,11 +271,61 @@ class Data:
         self.plot_different_dimensions(self.waypoint_positions(), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
         
         if showplot:
-            
+
             plt.legend()
             plt.grid(True, ls='--')
             plt.show()
 
+    def plot_trajectory_center(self, XYZ=(True, True, True), part='sections', type='scatter', showplot=True, label='Trajectory Center', title=None, color='blue', custom_axis_label=(None,None,None)):
+        '''
+        Style should be 'total' or 'sections' or 'target'
+        '''
+        
+        import matplotlib.pyplot as plt
+        import calculations
+
+        waypoints = self.waypoint_positions()
+
+
+        if part == 'total':
+            data = np.array([calculations.find_center(waypoints, self.r)])
+        elif part == 'sections':
+            self.maneuver_duration
+            maneuvers = []
+            
+            maneuver_start = 0
+            i = 0
+            offset = 0
+            while i < len(self.maneuver_duration):
+                if self.maneuver_duration[i] > 2.1:
+                    maneuvers.append(waypoints[maneuver_start - offset:i - 1 - offset,:])
+                    offset += 2
+                    maneuver_start = i
+                    i += 2
+
+                i += 1
+
+            data = np.empty((len(maneuvers),3))
+
+            for i in range(len(data)):
+                data[i,:] = calculations.find_center(np.array(maneuvers[i]),self.r)
+
+        elif part == 'target':
+            start_location = self.arm_position[0,:]
+            data = np.array([start_location - np.array([self.r, 0, 0])])
+
+        else:
+            print('Choose available trajectory center part. So either "total" for the entire half circle, or "sections" for each arm movement.')
+            raise ValueError
+
+
+
+        self.plot_different_dimensions(data, XYZ=XYZ, color=color, label=label, title=title, custom_axis_label=custom_axis_label, type=type)
+
+        if showplot:
+            plt.legend()
+            plt.grid(True, ls='--')
+            plt.show()
 
             
     def plot_different_dimensions(self, data, XYZ, color, label, title, custom_axis_label, type='line'):
