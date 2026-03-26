@@ -62,13 +62,3 @@ def moving_averages(data, window_size, axis=0, extension_type='mirror'):
     if axis == 1:
         filtered_data = np.transpose(filtered_data)
     return filtered_data
-
-def threshold_filter(data_class, data, filtering_array, threshold_value=-1, interpolate='linear'):
-    '''
-    Applies a threshold filter and interpolates the removed data.
-
-    :param data: The full array of which the values must be removed
-    :param filtering_array: The array on which the threshold filter is run, to decide which lines to remove from full array
-    :param threshold_value: The absolute value above which a datapoint should be removed. -1 means automatic
-    :param interpolate: the interpolation type, 'linear'
-    '''

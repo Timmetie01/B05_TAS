@@ -45,7 +45,7 @@ def find_center(input_points, radius):
     #         # print(error)
     #     return error
         
-    # result = minimize(squared_error, x0=[0,0,0])    
+    # result = minimize(squared_error, x0=[3000,1200,2000])    
     # x = result.x
 
     # #return np.array([x[0], np.average(input_points[:,1]), x[2]])
@@ -56,8 +56,7 @@ def find_center(input_points, radius):
         error = 0
         for i in input_points:
             error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - radius) ** 2
-        
-        print(error, center)
+
         return error
         
     result = minimize(squared_error, x0=[3000,2000])    
