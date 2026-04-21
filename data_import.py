@@ -20,7 +20,7 @@ def get_data(filepath):
 def get_target_position(data_class, data_type):
     start_pos = data_class.arm_position[0,:]
     angle_arr = np.linspace(0, np.pi, len(data_class.arm_position[:,0]))
-    target_pos = np.empty((len(angle_arr), 3))
+    target_pos = np.zeros((len(angle_arr), 3))
 
     r = data_class.r
 

@@ -256,22 +256,71 @@ class Data:
         plt.vlines(end_list, ymin, ymax, color='red', label='End maneuver')
 
 
-    def waypoint_positions(self, margin_from_maneuver=3):
+    def waypoint_positions(self, margin_from_maneuver=3, input_arr=None):
+        #Take the average over the positions where the arm is not moving. THe starts and ends of maneuvers are already known, so this is simply an average taken below
+
+        arr = input_arr if input_arr is not None else self.arm_position
     
-        arm_waypoint_locations = list([self.arm_position[0,:]])
+        arm_waypoint_locations = list([arr[0,:]])
         for s, e in zip(self.maneuver_start_index, self.maneuver_end_index):
             
-            arm_waypoint_locations.append(np.average(self.arm_position[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
+            arm_waypoint_locations.append(np.average(arr[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
             
         return np.array(arm_waypoint_locations)
     
+    def target_waypoints(self):
+        #Linearly space the amount of waypoints minus the amount of base movements to get the amount of unique target waypoints
+        #Then, at the positions where the base moves, duplicate the target waypoint
+        #This is because the measured waypoint before and after the maneuver should coincide
+        waypoint_count = len(self.waypoint_positions())
+        print('waypoint count:', waypoint_count)
+        base_maneuvers = self.base_movement[:,0]
+        base_maneuver_count = len(base_maneuvers[base_maneuvers != 0])
+
+        start_pos = self.arm_position[0,:]
+        angle_arr = np.linspace(0, np.pi, waypoint_count + base_maneuver_count)
+        target_waypoint = np.zeros((len(angle_arr), 3))
+
+        r = self.r
+
+        target_waypoint[:,0] = r * (np.cos(angle_arr) - 1)
+        target_waypoint[:,2] = r * ( -1 * np.sin(angle_arr))
+        target_waypoint += start_pos
+
+        print(len(target_waypoint))
+        #To get the indices where the array should be doubled, use the input file and find the indices of its waypoints where the base moves
+        indices = np.argwhere(self.base_movement[:,0])
+        a = np.ones_like(indices)
+        a[0,0] = 0
+        indices = np.diff(indices, 1, 0, 0) - 1 - a
+        indices = np.cumsum(indices, 0)
+        indices = np.flip(indices, 0)
+        print(indices)
+
+
+        for i in indices[:,0]:
+            target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:] + 5, axis=0)
+
+        #print(target_waypoint)
+        print(len(target_waypoint))
+        return target_waypoint
+
     def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
 
         self.plot_different_dimensions(self.waypoint_positions(), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
         
         if showplot:
+            plt.legend()
+            plt.grid(True, ls='--')
+            plt.show()
 
+    def plot_target_waypoints(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Target waypoints', title=None, color='firebrick', custom_axis_label=(None, None, None)):
+        import matplotlib.pyplot as plt
+
+        self.plot_different_dimensions(self.target_waypoints(), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
+        
+        if showplot:
             plt.legend()
             plt.grid(True, ls='--')
             plt.show()
