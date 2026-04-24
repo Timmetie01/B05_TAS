@@ -27,8 +27,40 @@ def get_target_position(data_class, data_type):
     target_pos[:,0] = r * (np.cos(angle_arr) - 1)
     target_pos[:,2] = r * ( -1 * np.sin(angle_arr))
     target_pos += start_pos
-    
+    '''
+    theta=-1 * np.pi/180
+    target_pos -= np.array([4210, 0, 2220])
+    target_pos = target_pos @ np.array([[np.cos(theta),0,np.sin(theta)],[0,1,0],[-1 * np.sin(theta),0,np.cos(theta)]])
+    target_pos += np.array([4210, 0, 2220])
+    '''
     return target_pos
+
+def get_base_target(data_class, data_type):
+    start_pos = data_class.base_position[0,:]
+    angle_arr = np.linspace(0, np.pi, len(data_class.arm_position[:,0]))
+    target_pos = np.zeros((len(angle_arr), 3))
+    
+    radii = {
+        '1':1.8218,
+        '2':2.34,
+        '3':2.34,
+        '4':2.34
+    }
+
+    rotation = {
+        '1':-0.1,
+        '2':-0.1,
+        '3':0,
+        '4':0
+    }
+
+
+    theta0 = rotation[data_type[-1]]
+    r = radii[data_type[-1]] * 1000
+
+    target_pos[:,0] = r * (np.cos(angle_arr) - 1)
+    target_pos[:,2] = r * ( -1 * np.sin(angle_arr))
+    return target_pos @ np.array([[np.cos(theta0),0, np.sin(theta0)], [0,1,0], [-1 * np.sin(theta0), 0, np.cos(theta0)]]) + start_pos
 
 def save_data_arrays(header_size=5, right_cutoff=10):
     take_001 = pd.read_csv(f"AE2224-I_dataset/take_001.csv")

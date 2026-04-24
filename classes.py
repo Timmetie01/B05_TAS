@@ -278,31 +278,35 @@ class Data:
         base_maneuver_count = len(base_maneuvers[base_maneuvers != 0])
 
         start_pos = self.arm_position[0,:]
-        angle_arr = np.linspace(0, np.pi, waypoint_count + base_maneuver_count)
+        angle_arr = np.linspace(0, np.pi, waypoint_count - base_maneuver_count - 1)
         target_waypoint = np.zeros((len(angle_arr), 3))
 
         r = self.r
+
 
         target_waypoint[:,0] = r * (np.cos(angle_arr) - 1)
         target_waypoint[:,2] = r * ( -1 * np.sin(angle_arr))
         target_waypoint += start_pos
 
-        print(len(target_waypoint))
         #To get the indices where the array should be doubled, use the input file and find the indices of its waypoints where the base moves
         indices = np.argwhere(self.base_movement[:,0])
+
         a = np.ones_like(indices)
         a[0,0] = 0
-        indices = np.diff(indices, 1, 0, 0) - 1 - a
-        indices = np.cumsum(indices, 0)
-        indices = np.flip(indices, 0)
-        print(indices)
-
+        indices = indices - np.cumsum(a, axis=0)
+        indices = np.insert(indices, 0, np.array([[0]]), axis=0)
 
         for i in indices[:,0]:
-            target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:] + 5, axis=0)
+            target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
         #print(target_waypoint)
-        print(len(target_waypoint))
+
+        '''
+        theta = -1 * np.pi/180
+        target_waypoint -= np.array([4210, 0, 2220])
+        target_waypoint = target_waypoint @ np.array([[np.cos(theta),0,np.sin(theta)],[0,1,0],[-1 * np.sin(theta),0,np.cos(theta)]])
+        target_waypoint += np.array([4210, 0, 2220])
+        '''
         return target_waypoint
 
     def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
@@ -319,6 +323,17 @@ class Data:
         import matplotlib.pyplot as plt
 
         self.plot_different_dimensions(self.target_waypoints(), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
+        
+        if showplot:
+            plt.legend()
+            plt.grid(True, ls='--')
+            plt.show()
+
+    def plot_base_circle(self, XYZ=(True,True,True), type='line', showplot=True, label='Base half circle', title=None, color='firebrick', custom_axis_label=(None, None, None)):
+        import matplotlib.pyplot as plt
+        import data_import
+
+        self.plot_different_dimensions(data_import.get_base_target(self, self.data_type), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
         
         if showplot:
             plt.legend()
@@ -394,6 +409,9 @@ class Data:
             ax.set_ylabel('Y')
             ax.set_zlabel('Z')
             plt.gca().set_aspect('equal')
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
+            if custom_axis_label[2] is not None: ax.set_zlabel(custom_axis_label[2])
 
         elif XYZ == (True, True, False):
             ax = graphing.get_ax(XYZ)
@@ -404,6 +422,8 @@ class Data:
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             plt.gca().set_aspect('equal')
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
         
         elif XYZ == (True, False, True):
             ax = graphing.get_ax(XYZ)
@@ -415,6 +435,8 @@ class Data:
             ax.set_ylabel('Z')
             ax.xaxis.set_inverted(True)
             plt.gca().set_aspect('equal')
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[2] is not None: ax.set_ylabel(custom_axis_label[2])
 
         elif XYZ == (False, True, True):
             ax = graphing.get_ax(XYZ)
@@ -425,34 +447,67 @@ class Data:
             ax.set_xlabel('Y')
             ax.set_ylabel('Z')
             plt.gca().set_aspect('equal')
+            if custom_axis_label[1] is not None: ax.set_xlabel(custom_axis_label[1])
+            if custom_axis_label[2] is not None: ax.set_ylabel(custom_axis_label[2])
 
         elif XYZ == (True, False, False):
             ax = graphing.get_ax(XYZ)
             ax.plot(np.arange(len(data[:,0]))/self.frequency, data[:,0], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('X')
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
 
         elif XYZ == (False, True, False):
             ax = graphing.get_ax(XYZ)
             ax.plot(np.arange(len(data[:,1]))/self.frequency, data[:,1], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('Y')
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
 
         elif XYZ == (False, False, True):
             ax = graphing.get_ax(XYZ)
             ax.plot(np.arange(len(data[:,2]))/self.frequency, data[:,2], label=label, color=color)
             ax.set_xlabel('time (s)')
             ax.set_ylabel('Z')
+        
+            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
+            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
 
         else:
             print('Choose correct plot dimensions, either 3d or 2d allowed.')
             raise ValueError
+    
         
         if title is not None: ax.set_title(title)
 
-        if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-        if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-        if custom_axis_label[2] is not None: ax.set_zlabel(custom_axis_label[2])
+
+
+    def waypoint_error(self, print_report=True):
+        error = np.linalg.norm((self.waypoint_positions() - self.target_waypoints()), axis=1)
+        if print_report:
+            error_x = self.waypoint_positions()[:,0] - self.target_waypoints()[:,0]
+            error_y = self.waypoint_positions()[:,1] - self.target_waypoints()[:,1]
+            error_z = self.waypoint_positions()[:,2] - self.target_waypoints()[:,2]
+            print(f'For take {self.data_type[-1]}, the errors in the waypoint are built up as follows: \n')
+            print(f'The absolute error goes from {round(min(error), 2)} mm up to {round(max(error), 2)} mm. The standard deviation is {round(np.std(error), 2)} mm, and average is {round(np.average(error), 2)} mm.')
+            print(f'The error in X goes from {round(min(error_x), 2)} mm up to {round(max(error_x), 2)} mm. The standard deviation is {round(np.std(error_x), 2)} mm, and average is {round(np.average(error_x), 2)} mm.')
+            print(f'The error in Y goes from {round(min(error_y), 2)} mm up to {round(max(error_y), 2)} mm. The standard deviation is {round(np.std(error_y), 2)} mm, and average is {round(np.average(error_y), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error_y)), 2)} mm.')
+            print(f'The error in Z goes from {round(min(error_z), 2)} mm up to {round(max(error_z), 2)} mm. The standard deviation is {round(np.std(error_z), 2)} mm, and average is {round(np.average(error_z), 2)} mm.')
+            
+        return error
+
+    def plot_waypoint_error(self, color='darkblue', print_report=True, showplot=True):
+        import matplotlib.pyplot as plt
+        error = self.waypoint_error(print_report=print_report)
+        plt.scatter(range(len(error)), error, color=color, label=f'Take {self.data_type[-1]}')
+        plt.title('Error at waypoints')
+        plt.xlabel('Waypoint number')
+        plt.ylabel('error (mm)')
+        if showplot:
+            plt.legend()
+            plt.show()
 
 
 
