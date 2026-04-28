@@ -567,4 +567,30 @@ class Data:
 
         return data
 
+    def noise_covariance(self, component, window=5, derivative_order=1):
+        '''
+        A function of quantifying the noise through covariance
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
+        '''
+        vel = self.get_data_after_operations(component, (f'derivative_{derivative_order}'))
+        velfilt = self.get_data_after_operations(component,(f'ma_filter_{window}', f'derivative_{derivative_order}'))
+        eta = vel - velfilt
+        cov = np.cov(eta.T)
 
+        trace = np.trace(cov)
+        rms_noise = np.sqrt(trace)
+        std_axes = np.sqrt(np.diag(cov))
+
+        eigvals, eigvecs = np.linalg.eig(cov)
+        principal_std = np.sqrt(eigvals)
+
+        result = {
+            "covariance": cov,
+            "trace": trace,
+            "rms_noise": rms_noise,
+            "std_per_axis": std_axes,
+            "principal_std": principal_std,
+            "eigenvectors": eigvecs
+        }
+
+        return result
