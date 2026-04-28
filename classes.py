@@ -484,18 +484,21 @@ class Data:
 
 
 
-    def waypoint_error(self, print_report=True):
+    def waypoint_error(self, print_report=True, return_dimensions_separately=False):
         error = np.linalg.norm((self.waypoint_positions() - self.target_waypoints()), axis=1)
-        if print_report:
+        if print_report or return_dimensions_separately:
             error_x = self.waypoint_positions()[:,0] - self.target_waypoints()[:,0]
             error_y = self.waypoint_positions()[:,1] - self.target_waypoints()[:,1]
             error_z = self.waypoint_positions()[:,2] - self.target_waypoints()[:,2]
+        if print_report:
             print(f'For take {self.data_type[-1]}, the errors in the waypoint are built up as follows: \n')
             print(f'The absolute error goes from {round(min(error), 2)} mm up to {round(max(error), 2)} mm. The standard deviation is {round(np.std(error), 2)} mm, and average is {round(np.average(error), 2)} mm.')
             print(f'The error in X goes from {round(min(error_x), 2)} mm up to {round(max(error_x), 2)} mm. The standard deviation is {round(np.std(error_x), 2)} mm, and average is {round(np.average(error_x), 2)} mm.')
             print(f'The error in Y goes from {round(min(error_y), 2)} mm up to {round(max(error_y), 2)} mm. The standard deviation is {round(np.std(error_y), 2)} mm, and average is {round(np.average(error_y), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error_y)), 2)} mm.')
             print(f'The error in Z goes from {round(min(error_z), 2)} mm up to {round(max(error_z), 2)} mm. The standard deviation is {round(np.std(error_z), 2)} mm, and average is {round(np.average(error_z), 2)} mm.')
             
+        if return_dimensions_separately:
+            return error, error_x, error_y, error_z
         return error
 
     def plot_waypoint_error(self, color='darkblue', print_report=True, showplot=True):
