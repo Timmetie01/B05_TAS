@@ -42,6 +42,7 @@ def test_filter(filtered_data, input_data, difference=False, truth=None, discret
         #    plt.plot(np.arange(0, len(filtered_data[:,i]), 1) + filter_shift, filter_delta[:,i], label='Difference', color='darkgreen')
 
     if showplot:
+        plt.grid(True, ls='--')
         plt.title('Filtered vs unfiltered data')
         plt.legend()
         plt.show()
@@ -80,6 +81,7 @@ def trajectory_3d_plot(data=None, filtered=None, target=None, dimensions=(True, 
                 )
 
     if showplot:
+        plt.grid(True, ls='--')
         plt.legend()
         plt.gca().set_aspect('equal')
         ax.set_xlabel('X')

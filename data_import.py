@@ -27,12 +27,7 @@ def get_target_position(data_class, data_type):
     target_pos[:,0] = r * (np.cos(angle_arr) - 1)
     target_pos[:,2] = r * ( -1 * np.sin(angle_arr))
     target_pos += start_pos
-    '''
-    theta=-1 * np.pi/180
-    target_pos -= np.array([4210, 0, 2220])
-    target_pos = target_pos @ np.array([[np.cos(theta),0,np.sin(theta)],[0,1,0],[-1 * np.sin(theta),0,np.cos(theta)]])
-    target_pos += np.array([4210, 0, 2220])
-    '''
+
     return target_pos
 
 def get_base_target(data_class, data_type):

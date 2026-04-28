@@ -286,7 +286,6 @@ class Data:
 
         target_waypoint[:,0] = r * (np.cos(angle_arr) - 1)
         target_waypoint[:,2] = r * ( -1 * np.sin(angle_arr))
-        target_waypoint += start_pos
 
         #To get the indices where the array should be doubled, use the input file and find the indices of its waypoints where the base moves
         indices = np.argwhere(self.base_movement[:,0])
@@ -300,14 +299,12 @@ class Data:
             target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
         #print(target_waypoint)
+        from calculations import find_center
+        target_waypoint += find_center(self.waypoint_positions(), None) - np.array([-r, 0, 0])
 
-        '''
-        theta = -1 * np.pi/180
-        target_waypoint -= np.array([4210, 0, 2220])
-        target_waypoint = target_waypoint @ np.array([[np.cos(theta),0,np.sin(theta)],[0,1,0],[-1 * np.sin(theta),0,np.cos(theta)]])
-        target_waypoint += np.array([4210, 0, 2220])
-        '''
-        return target_waypoint #+ np.array([250,0,0]) #Crazy guess: what if markers not in tip of arm
+        print(waypoint_count, len(target_waypoint))
+
+        return target_waypoint  #Crazy guess: what if markers not in tip of arm
 
     def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
@@ -490,6 +487,7 @@ class Data:
             error_x = self.waypoint_positions()[:,0] - self.target_waypoints()[:,0]
             error_y = self.waypoint_positions()[:,1] - self.target_waypoints()[:,1]
             error_z = self.waypoint_positions()[:,2] - self.target_waypoints()[:,2]
+            print(error, max(error), min(error))
         if print_report:
             print(f'For take {self.data_type[-1]}, the errors in the waypoint are built up as follows: \n')
             print(f'The absolute error goes from {round(min(error), 2)} mm up to {round(max(error), 2)} mm. The standard deviation is {round(np.std(error), 2)} mm, and average is {round(np.average(error), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error)), 2)} mm.')
@@ -509,9 +507,68 @@ class Data:
         plt.xlabel('Waypoint number')
         plt.ylabel('error (mm)')
         if showplot:
+            plt.grid(True, ls='--')
             plt.legend()
             plt.show()
 
 
+    def get_data_after_operations(self, component, operations):
+        '''
+        A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
+
+        :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
+        
+        
+        :param operations: A tuple of operations in the order you want them executed. \n
+        Possiblities: \n
+        'ma_filter_x' (x is window width), \n
+        'derivative_x' (x is degree of derivative), \n
+        None/'None'/'none' for nothing (i.e. placeholder), \n
+        'threshold_filter_AB' (A is component (X, Y or Z), B is which derivative you want to use for the filter array (so use 1 if you want it filtered relative to velocity (which you should)). \n
+        Example ('ma_filter_5', 'derivative_2', 'ma_filter_11') to calculate the second order derivative of data filtered with window width 5, and then filter the result with width 11.
+        '''
+        import filters
+        import calculations
+        import graphing
+        import matplotlib.pyplot as plt
+        data = self.data_selection(component)
+        starting_data = data
+        
+
+
+        if type(operations) is not tuple:
+            operations = (operations,)
+        
+        #Loop through the operations tuple, and perform each one.
+        for i in operations:
+            if i[0:10] == 'ma_filter_':
+                data = filters.moving_averages(data, int(i[10:]))
+
+            elif i[0:11] == 'derivative_':
+                n = int(i[11:])
+                for j in range(n):
+                    data = calculations.num_derivative(data, self.frequency)
+
+            elif i[0:17] == 'threshold_filter_':
+                component = 0 if i[17] == 'X' else 1 if i[17] == 'Y' else 2 if i[17] == 'Z' else 3
+                if component == 3:
+                    raise ValueError
+                
+                filtering_array = np.transpose(np.array([starting_data[:,component]]))
+                filtering_array = filters.moving_averages(filtering_array, 21)
+                for j in range(int(i[18])):
+                    filtering_array = calculations.num_derivative(filtering_array, self.frequency)
+
+                #A horribly coded way to pass details through to the next function:
+                data = filters.threshold_filter(self, data, filtering_array, component=f"{i[17:19]}{"bp" if component == "base_position" else "ap" if component == "arm_position" else "ar" if component  == "arm_rotation_deg" or component == "arm_rotation_rad" else "br" if component  == "base_rotation_deg" or component == "base_rotation_rad" else "ar"}")
+                
+            elif i == None or i == 'None' or i == 'none':
+                continue
+            else:
+                print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!\t**\t**\n\n')
+                raise ValueError
+
+
+        return data
 
 
