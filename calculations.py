@@ -37,18 +37,18 @@ def find_center(input_points, radius):
     from scipy.optimize import minimize
     if radius is None:
         #[x, y, r]
-        def squared_error(center=[0,0,0]):
+        def squared_error(center):
             error = 0
             for i in input_points:
-                error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - center[2]) ** 2
+                error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - max(min(center[2],2500),250)) ** 2
 
             return error
             
-        result = minimize(squared_error, x0=[3000,2000, 1800])    
+        result = minimize(squared_error, x0=[3000,2000, 1800], bounds=[(None, None), (None, None), (100, 10000)])    
         x = result.x
     else:
         #[x, y]
-        def squared_error(center=[0,0,0]):
+        def squared_error(center):
             error = 0
             for i in input_points:
                 error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - radius) ** 2
@@ -58,7 +58,7 @@ def find_center(input_points, radius):
         result = minimize(squared_error, x0=[3000,2000])    
         x = result.x
 
-    return np.array([x[0], np.average(input_points[:,1]), x[1]])
+    return np.array([x[0], np.nanmean(input_points[:,1]), x[1]])
 
 
 

@@ -265,8 +265,10 @@ class Data:
         for s, e in zip(self.maneuver_start_index, self.maneuver_end_index):
             
             arm_waypoint_locations.append(np.average(arr[e+margin_from_maneuver:s-margin_from_maneuver,:], 0))
-            
-        return np.array(arm_waypoint_locations)
+        arm_waypoint_locations = np.array(arm_waypoint_locations)
+        arm_waypoint_locations = arm_waypoint_locations[~np.isnan(arm_waypoint_locations).any(axis=1)]
+
+        return arm_waypoint_locations
     
     def target_waypoints(self):
         #Linearly space the amount of waypoints minus the amount of base movements to get the amount of unique target waypoints
@@ -277,7 +279,6 @@ class Data:
         base_maneuvers = self.base_movement[:,0]
         base_maneuver_count = len(base_maneuvers[base_maneuvers != 0])
 
-        start_pos = self.arm_position[0,:]
         angle_arr = np.linspace(0, np.pi, waypoint_count - base_maneuver_count - 1)
         target_waypoint = np.zeros((len(angle_arr), 3))
 
@@ -300,9 +301,7 @@ class Data:
 
         #print(target_waypoint)
         from calculations import find_center
-        target_waypoint += find_center(self.waypoint_positions(), None) - np.array([-r, 0, 0])
-
-        print(waypoint_count, len(target_waypoint))
+        target_waypoint += find_center(self.waypoint_positions(), None) + np.array([r, 0, 0])
 
         return target_waypoint  #Crazy guess: what if markers not in tip of arm
 
@@ -482,7 +481,9 @@ class Data:
 
 
     def waypoint_error(self, print_report=True, return_dimensions_separately=False):
+        #Get the different errors from measured waypoints to the target waypoints
         error = np.linalg.norm((self.waypoint_positions() - self.target_waypoints()), axis=1)
+
         if print_report or return_dimensions_separately:
             error_x = self.waypoint_positions()[:,0] - self.target_waypoints()[:,0]
             error_y = self.waypoint_positions()[:,1] - self.target_waypoints()[:,1]
@@ -514,7 +515,7 @@ class Data:
 
     def get_data_after_operations(self, component, operations):
         '''
-        A function capable of plotting the data after an unlimited sequence of operations, such as derivatives and filters.
+        A function capable of returning the data after a large sequence of operations, such as derivatives and filters. Extremely similar to the plot_operations function
 
         :param component: Either 'base_position', 'base_rotation_deg', base_rotation_rad, 'arm_position', 'arm_rotation_deg', 'arm_rotation_rad' or 'target'
         
@@ -529,12 +530,8 @@ class Data:
         '''
         import filters
         import calculations
-        import graphing
-        import matplotlib.pyplot as plt
         data = self.data_selection(component)
         starting_data = data
-        
-
 
         if type(operations) is not tuple:
             operations = (operations,)
@@ -567,7 +564,6 @@ class Data:
             else:
                 print('\n\n**\t**\tChoose allowed operation, read the docstring for more information!\t**\t**\n\n')
                 raise ValueError
-
 
         return data
 
