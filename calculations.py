@@ -36,20 +36,19 @@ def num_derivative(input_array, frequency, axis=0):
 def find_center(input_points, radius):
     from scipy.optimize import minimize
 
-
-    def squared_error(center=[0,0]):
+    #[x, y, r]
+    def squared_error(center=[0,0,0]):
         error = 0
         for i in input_points:
-            error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - radius) ** 2
+            error += (np.sqrt((i[0] - center[0]) ** 2 + (i[2] - center[1]) ** 2) - center[2]) ** 2
 
         return error
         
-    result = minimize(squared_error, x0=[3000,2000])    
+    result = minimize(squared_error, x0=[3000,2000, 1800])    
     x = result.x
 
     return np.array([x[0], np.average(input_points[:,1]), x[1]])
 
-#def estimate_target_waypoints(data_class):
 
 
 

@@ -273,7 +273,7 @@ class Data:
         #Then, at the positions where the base moves, duplicate the target waypoint
         #This is because the measured waypoint before and after the maneuver should coincide
         waypoint_count = len(self.waypoint_positions())
-        print('waypoint count:', waypoint_count)
+        #print('waypoint count:', waypoint_count)
         base_maneuvers = self.base_movement[:,0]
         base_maneuver_count = len(base_maneuvers[base_maneuvers != 0])
 
@@ -307,7 +307,7 @@ class Data:
         target_waypoint = target_waypoint @ np.array([[np.cos(theta),0,np.sin(theta)],[0,1,0],[-1 * np.sin(theta),0,np.cos(theta)]])
         target_waypoint += np.array([4210, 0, 2220])
         '''
-        return target_waypoint
+        return target_waypoint #+ np.array([250,0,0]) #Crazy guess: what if markers not in tip of arm
 
     def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
