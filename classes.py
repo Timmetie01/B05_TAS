@@ -288,6 +288,9 @@ class Data:
         target_waypoint[:,0] = r * (np.cos(angle_arr) - 1)
         target_waypoint[:,2] = r * ( -1 * np.sin(angle_arr))
 
+
+        
+
         #To get the indices where the array should be doubled, use the input file and find the indices of its waypoints where the base moves
         indices = np.argwhere(self.base_movement[:,0])
 
@@ -335,16 +338,14 @@ class Data:
             plt.grid(True, ls='--')
             plt.show()
 
-    def plot_trajectory_center(self, XYZ=(True, True, True), part='sections', type='scatter', showplot=True, label='Trajectory Center', title=None, color='blue', custom_axis_label=(None,None,None)):
+    def get_trajectory_center(self, part='sections'):
         '''
-        Style should be 'total' or 'sections' or 'target'
+        part should be 'total' or 'sections' or 'target'
         '''
         
-        import matplotlib.pyplot as plt
         import calculations
 
         waypoints = self.waypoint_positions()
-
 
         if part == 'total':
             data = np.array([calculations.find_center(waypoints, None)])
@@ -377,7 +378,6 @@ class Data:
             indices -= np.cumsum(np.ones_like(indices), axis=0)
             indices += 2
             indices = np.insert(indices, 0, 0, 0)
-            print(indices)
             maneuvers = []
             for i in range(len(indices)-1):
                 maneuvers.append(waypoints[indices[i,0]:indices[i+1,0],:])
@@ -386,13 +386,6 @@ class Data:
             for i, m in enumerate(maneuvers):
                 data[i,:] = calculations.find_center(np.array(m))
 
-            ############################################
-            import matplotlib.pyplot as plt
-            for i in maneuvers:
-                plt.plot(i[:,0], i[:,2])
-
-
-            #######################################
 
         elif part == 'target':
             data = np.array([calculations.find_center(self.target_waypoints(), None)])
@@ -401,7 +394,17 @@ class Data:
             print('Choose available trajectory center part. So either "total" for the entire half circle, or "sections" for each arm movement.')
             raise ValueError
 
+        return data
 
+
+    def plot_trajectory_center(self, XYZ=(True, True, True), part='sections', type='scatter', showplot=True, label='Trajectory Center', title=None, color='blue', custom_axis_label=(None,None,None)):
+        '''
+        part should be 'total' or 'sections' or 'target'
+        '''
+        
+        import matplotlib.pyplot as plt
+        
+        data = self.get_trajectory_center(part)
 
         self.plot_different_dimensions(data, XYZ=XYZ, color=color, label=label, title=title, custom_axis_label=custom_axis_label, type=type)
 
