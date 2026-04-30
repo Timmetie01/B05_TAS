@@ -279,7 +279,16 @@ class Data:
         base_maneuvers = self.base_movement[:,0]
         base_maneuver_count = len(base_maneuvers[base_maneuvers != 0])
 
-        angle_arr = np.linspace(0, np.pi, waypoint_count - base_maneuver_count - 1)
+        rotation = {
+            '1':0,
+            '2':0.0,
+            '3':0.0,
+            '4':0.0
+        }
+
+        rot_angle = rotation[self.data_type[-1]]
+
+        angle_arr = np.linspace(0 + rot_angle, np.pi + rot_angle, waypoint_count - base_maneuver_count - 1)
         target_waypoint = np.zeros((len(angle_arr), 3))
 
         r = self.r
@@ -303,7 +312,7 @@ class Data:
             target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
         from calculations import find_center
-        target_waypoint += find_center(self.waypoint_positions(), None) + np.array([r, 0, 0])
+        target_waypoint += self.get_trajectory_center('sections')[0,:] + np.array([r, 0, 0])
 
         return target_waypoint  #Crazy guess: what if markers not on tip of the arm??
 
