@@ -46,3 +46,9 @@ plt.show()
 # take_2.motion_capture_waypoint_error(True)
 # take_3.motion_capture_waypoint_error(True)
 # take_3.motion_capture_waypoint_error(True)
+take_4.plot_waypoint_error(print_report=True, showplot=True)
+print(np.nan == np.nan)
+
+
+arm_noise = take_2.noise_covariance('arm_position')
+print(arm_noise)
