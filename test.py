@@ -10,6 +10,7 @@ take_3 = classes.Data('take_003')
 take_4 = classes.Data('take_004')
 take_5 = classes.Data('take_005')
 
+
 #Discretization?
 #Base slipping?
 #Markers not on arm tip??
@@ -41,14 +42,15 @@ plt.show()
 
  
 
-# take_3.plot_waypoint_tracking_error(print_report=True, showplot=True)
-# take_1.motion_capture_waypoint_error(True)
-# take_2.motion_capture_waypoint_error(True)
-# take_3.motion_capture_waypoint_error(True)
-# take_3.motion_capture_waypoint_error(True)
-take_4.plot_waypoint_error(print_report=True, showplot=True)
-print(np.nan == np.nan)
+#take_3.plot_waypoint_tracking_error(print_report=True, showplot=True)
+take_1.motion_capture_waypoint_error(True)
+take_2.motion_capture_waypoint_error(True)
+take_3.motion_capture_waypoint_error(True)
+take_3.motion_capture_waypoint_error(True)
+#take_4.plot_waypoint_error(print_report=True, showplot=True)
 
 
-arm_noise = take_2.noise_covariance('arm_position')
-print(arm_noise)
+
+#arm_noise = take_2.noise_covariance('arm_position')
+#print(arm_noise)
+

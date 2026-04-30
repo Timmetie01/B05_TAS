@@ -299,11 +299,10 @@ class Data:
         for i in indices[:,0]:
             target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
-        #print(target_waypoint)
         from calculations import find_center
         target_waypoint += find_center(self.waypoint_positions(), None) + np.array([r, 0, 0])
 
-        return target_waypoint  #Crazy guess: what if markers not in tip of arm
+        return target_waypoint  #Crazy guess: what if markers not on tip of the arm??
 
     def plot_waypoint_estimates(self, XYZ=(True,True,True), type='scatter', showplot=True, label='Arm waypoints', title=None, color='darkblue', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
@@ -348,8 +347,21 @@ class Data:
 
 
         if part == 'total':
-            data = np.array([calculations.find_center(waypoints, self.r)])
+            data = np.array([calculations.find_center(waypoints, None)])
         elif part == 'sections':
+            
+            #Reusing code from the target waypoints
+            indices = np.argwhere(self.base_movement[:,0])
+
+            indices = np.insert(indices, 0, 0, 0)
+            print(indices)
+            maneuvers = []
+            for i in range(len(indices)-1):
+                maneuvers.append(waypoints[indices[i,0]:indices[i+1,0],:])
+                
+                
+                
+            '''
             self.maneuver_duration
             maneuvers = []
             
@@ -366,13 +378,13 @@ class Data:
                 i += 1
 
             data = np.empty((len(maneuvers),3))
-
-            for i in range(len(data)):
-                data[i,:] = calculations.find_center(np.array(maneuvers[i]),self.r)
+            '''
+            data = np.empty((len(indices)-1, 3))
+            for i, m in enumerate(maneuvers):
+                data[i,:] = calculations.find_center(np.array(m))
 
         elif part == 'target':
-            start_location = self.arm_position[0,:]
-            data = np.array([start_location - np.array([self.r, 0, 0])])
+            data = np.array([calculations.find_center(self.target_waypoints(), None)])
 
         else:
             print('Choose available trajectory center part. So either "total" for the entire half circle, or "sections" for each arm movement.')
