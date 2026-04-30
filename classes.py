@@ -744,6 +744,10 @@ class Data:
         plt.show()
 
     def base_center_trajectory_reconstruction_1attempt(self):
+        '''
+        THIS FUNCTION IS DEPRECATED. USE THE 2ND ATTEMPT
+        '''
+        print('\n\n*\t*\t*\t*\tThe first attempt at base trajectory reconstruction is deprecated. use the second attempt!!\t*\t*\t*\t*\n\n\n')
         filtered_rotation = np.diff(
             self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
         )
@@ -773,7 +777,7 @@ class Data:
         plt.legend()
         plt.show()
 
-    def base_center_trajectory_reconstruction_2attempt(self):
+    def base_center_trajectory_reconstruction_2attempt(self,  XYZ=(True, True, True), color='black', label='Base Center Trajectory Reconstruction', title=None, custom_axis_label=(None, None, None), type='line'):
         filtered_rotation = np.diff(
             self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
         )
@@ -817,8 +821,11 @@ class Data:
 
         stitched = np.concatenate(reconstructed, axis=0)
 
+        '''
         plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
         plt.plot(stitched[:, 0], stitched[:, 2], label='corrected')
         plt.legend()
         plt.grid(True, ls='--')
         plt.show()
+        '''
+        self.plot_different_dimensions(stitched, XYZ, color, label, title, custom_axis_label, type)
