@@ -31,24 +31,38 @@ def get_target_position(data_class, data_type):
     return target_pos
 
 def get_base_target(data_class, data_type):
-    start_pos = data_class.base_position[0,:]
-    angle_arr = np.linspace(0, np.pi, len(data_class.arm_position[:,0]))
-    target_pos = np.zeros((len(angle_arr), 3))
     
+    offset_vector = {
+        '1':np.array([0, 0, 450.8]),
+        '2':np.array([0, 0, 440.5]),
+        '3':np.array([0, 0, 440.5]),
+        '4':np.array([0, 0, 423.8])
+    }
+
+    total_rotation_of_base = {
+        '1':3.0543262,
+        '2':2.9321531,
+        '3':2.9321531,
+        '4':2.93448025
+    }
+
     radii = {
-        '1':1.8218,
-        '2':2.34,
-        '3':2.34,
-        '4':2.34
+        '1':1.727,
+        '2':2.22,
+        '3':2.22,
+        '4':2.24
     }
 
     rotation = {
         '1':-0.1,
-        '2':-0.1,
+        '2':0.049,
         '3':0,
         '4':0
     }
 
+    start_pos = data_class.base_position[0,:] + offset_vector[data_type[-1]]
+    angle_arr = np.linspace(0, total_rotation_of_base[data_type[-1]], len(data_class.arm_position[:,0]))
+    target_pos = np.zeros((len(angle_arr), 3))
 
     theta0 = rotation[data_type[-1]]
     r = radii[data_type[-1]] * 1000
@@ -78,4 +92,5 @@ def save_data_arrays(header_size=5, right_cutoff=10):
 
 #When we get corrected or different data or something, the function below must be executed to renew saved numpy arrays
 #save_data_arrays(5, 10)
+    
     

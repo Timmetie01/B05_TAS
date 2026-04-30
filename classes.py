@@ -480,7 +480,7 @@ class Data:
 
 
 
-    def waypoint_error(self, print_report=True, return_dimensions_separately=False):
+    def waypoint_tracking_error(self, print_report=True, return_dimensions_separately=False):
         #Get the different errors from measured waypoints to the target waypoints
         error = np.linalg.norm((self.waypoint_positions() - self.target_waypoints()), axis=1)
 
@@ -490,7 +490,7 @@ class Data:
             error_z = self.waypoint_positions()[:,2] - self.target_waypoints()[:,2]
             print(error, max(error), min(error))
         if print_report:
-            print(f'For take {self.data_type[-1]}, the errors in the waypoint are built up as follows: \n')
+            print(f'For take {self.data_type[-1]}, the errors FROM WAYPOINT TO TARGET are built up as follows: ')
             print(f'The absolute error goes from {round(min(error), 2)} mm up to {round(max(error), 2)} mm. The standard deviation is {round(np.std(error), 2)} mm, and average is {round(np.average(error), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error)), 2)} mm.')
             print(f'The error in X goes from {round(min(error_x), 2)} mm up to {round(max(error_x), 2)} mm. The standard deviation is {round(np.std(error_x), 2)} mm, and average is {round(np.average(error_x), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error_x)), 2)} mm.')
             print(f'The error in Y goes from {round(min(error_y), 2)} mm up to {round(max(error_y), 2)} mm. The standard deviation is {round(np.std(error_y), 2)} mm, and average is {round(np.average(error_y), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error_y)), 2)} mm.')
@@ -499,10 +499,42 @@ class Data:
         if return_dimensions_separately:
             return error, error_x, error_y, error_z
         return error
+    
+    def motion_capture_waypoint_error(self, print_report, margin_from_maneuver=3, return_dimensions_separately=False):
 
-    def plot_waypoint_error(self, color='darkblue', print_report=True, showplot=True):
+        #Take the average over the positions where the arm is not moving. THe starts and ends of maneuvers are already known, so this is simply an average taken below
+
+        arr = self.arm_position
+    
+        arm_waypoint_error = np.zeros((1,3))
+        for s, e in zip(self.maneuver_start_index, self.maneuver_end_index):
+            
+            arm_waypoint_error = np.vstack((arm_waypoint_error, arr[e+margin_from_maneuver:s-margin_from_maneuver,:] - np.average(arr[e+margin_from_maneuver:s-margin_from_maneuver,:], axis=0)))
+        arm_waypoint_error = arm_waypoint_error[~np.isnan(arm_waypoint_error).any(axis=1)]
+        
+        error = np.linalg.norm(arm_waypoint_error, axis=1)
+
+        if print_report or return_dimensions_separately:
+            error_x = arm_waypoint_error[:,0]
+            error_y = arm_waypoint_error[:,1]
+            error_z = arm_waypoint_error[:,2]
+        if print_report:
+            print(f'\n\nFor take {self.data_type[-1]}, the motion capture errors inside the waypoints are built up as follows: \n')
+            print(f'The absolute error goes from {round(np.min(error), 5)} mm up to {round(np.max(error), 5)} mm. The standard deviation is {round(np.std(error), 5)} mm, and average is {round(np.average(error), 5)} mm. Average of the absolute error is {round(np.average(np.abs(error)), 5)} mm.')
+            print(f'The error in X goes from {round(np.min(error_x), 5)} mm up to {round(np.max(error_x), 5)} mm. The standard deviation is {round(np.std(error_x), 5)} mm, and average is {round(np.average(error_x), 5)} mm. Average of the absolute error is {round(np.average(np.abs(error_x)), 5)} mm.')
+            print(f'The error in Y goes from {round(np.min(error_y), 5)} mm up to {round(np.max(error_y), 5)} mm. The standard deviation is {round(np.std(error_y), 5)} mm, and average is {round(np.average(error_y), 5)} mm. Average of the absolute error is {round(np.average(np.abs(error_y)), 5)} mm.')
+            print(f'The error in Z goes from {round(np.min(error_z), 5)} mm up to {round(np.max(error_z), 5)} mm. The standard deviation is {round(np.std(error_z), 5)} mm, and average is {round(np.average(error_z), 5)} mm. Average of the absolute error is {round(np.average(np.abs(error_z)), 5)} mm.')
+            
+        if return_dimensions_separately:
+            return error, error_x, error_y, error_z
+        return error
+
+
+
+
+    def plot_waypoint_tracking_error(self, color='darkblue', print_report=True, showplot=True):
         import matplotlib.pyplot as plt
-        error = self.waypoint_error(print_report=print_report)
+        error = self.waypoint_tracking_error(print_report=print_report)
         plt.scatter(range(len(error)), error, color=color, label=f'Take {self.data_type[-1]}')
         plt.title('Error at waypoints')
         plt.xlabel('Waypoint number')
