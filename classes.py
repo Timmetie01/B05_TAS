@@ -349,18 +349,7 @@ class Data:
         if part == 'total':
             data = np.array([calculations.find_center(waypoints, None)])
         elif part == 'sections':
-            
-            #Reusing code from the target waypoints
-            indices = np.argwhere(self.base_movement[:,0])
-
-            indices = np.insert(indices, 0, 0, 0)
-            print(indices)
-            maneuvers = []
-            for i in range(len(indices)-1):
-                maneuvers.append(waypoints[indices[i,0]:indices[i+1,0],:])
-                
-                
-                
+            #Old code that didn't really work
             '''
             self.maneuver_duration
             maneuvers = []
@@ -379,9 +368,31 @@ class Data:
 
             data = np.empty((len(maneuvers),3))
             '''
+            #Reusing code from the target waypoints to obtain which waypoints are between the base maneuvers
+            indices = np.argwhere(self.base_movement[:,0])
+
+            
+            #indices += 1
+            #indices[0,0] -= 1
+            indices -= np.cumsum(np.ones_like(indices), axis=0)
+            indices += 2
+            indices = np.insert(indices, 0, 0, 0)
+            print(indices)
+            maneuvers = []
+            for i in range(len(indices)-1):
+                maneuvers.append(waypoints[indices[i,0]:indices[i+1,0],:])
+                
             data = np.empty((len(indices)-1, 3))
             for i, m in enumerate(maneuvers):
                 data[i,:] = calculations.find_center(np.array(m))
+
+            ############################################
+            import matplotlib.pyplot as plt
+            for i in maneuvers:
+                plt.plot(i[:,0], i[:,2])
+
+
+            #######################################
 
         elif part == 'target':
             data = np.array([calculations.find_center(self.target_waypoints(), None)])
