@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import data_import
+import matplotlib.pyplot as plt
 
 
 class Data:
@@ -661,3 +662,163 @@ class Data:
         }
 
         return result
+
+    def base_center_trajectory_reconstruction_1attempt(self):
+        filtered_rotation = np.diff(
+            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
+        )
+
+        margin = 0.05
+        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
+        base_rotating = np.diff(base_rotating)
+
+        start_idx = np.argwhere(base_rotating == 1).flatten()
+        end_idx   = np.argwhere(base_rotating == -1).flatten()
+
+        copy_base_pose = self.base_position.copy()
+
+        n = min(len(start_idx), len(end_idx) - 1)
+
+        for i in range(n):
+            end_i   = end_idx[i] + 1
+            start_i = start_idx[i + 1] + 1
+
+            offset = copy_base_pose[end_i] - copy_base_pose[start_i]
+            print(offset)
+
+            copy_base_pose[start_i:] += offset
+
+        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
+        plt.plot(copy_base_pose[:, 0], copy_base_pose[:, 2], label='corrected')
+        plt.legend()
+        plt.show()
+
+    def base_center_trajectory_reconstruction_2attempt(self):
+        filtered_rotation = np.diff(
+            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
+        )
+
+        margin = 0.05
+        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
+        transitions = np.diff(base_rotating)
+
+        start_idx = np.argwhere(transitions == 1).flatten() + 1  # base rotation starts
+        end_idx   = np.argwhere(transitions == -1).flatten() + 1  # base rotation ends
+
+        # Build list of "still" segments (between rotations)
+        # A still segment runs from end_idx[i] to start_idx[i+1]
+        still_segments = []
+
+        # Segment before first rotation
+        first_start = start_idx[0] if len(start_idx) > 0 else len(self.base_position)
+        still_segments.append((0, first_start))
+
+        n = min(len(start_idx), len(end_idx))
+        for i in range(n):
+            seg_start = end_idx[i]
+            seg_end   = start_idx[i + 1] if i + 1 < len(start_idx) else len(self.base_position)
+            still_segments.append((seg_start, seg_end))
+
+        # Now stitch still segments together by translating each to connect to the previous
+        reconstructed = []
+        offset = np.zeros(3)
+
+        for i, (s, e) in enumerate(still_segments):
+            segment = self.base_position[s:e].copy()
+            if len(segment) == 0:
+                continue
+            segment += offset
+            if i > 0 and len(reconstructed) > 0:
+                # Shift so this segment starts where the last one ended
+                gap = reconstructed[-1][-1] - segment[0]
+                segment += gap
+                offset += gap
+            reconstructed.append(segment)
+
+        stitched = np.concatenate(reconstructed, axis=0)
+
+        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
+        plt.plot(stitched[:, 0], stitched[:, 2], label='corrected')
+        plt.legend()
+        plt.grid(True, ls='--')
+        plt.show()
+
+    def base_center_trajectory_reconstruction_1attempt(self):
+        filtered_rotation = np.diff(
+            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
+        )
+
+        margin = 0.05
+        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
+        base_rotating = np.diff(base_rotating)
+
+        start_idx = np.argwhere(base_rotating == 1).flatten()
+        end_idx   = np.argwhere(base_rotating == -1).flatten()
+
+        copy_base_pose = self.base_position.copy()
+
+        n = min(len(start_idx), len(end_idx) - 1)
+
+        for i in range(n):
+            end_i   = end_idx[i] + 1
+            start_i = start_idx[i + 1] + 1
+
+            offset = copy_base_pose[end_i] - copy_base_pose[start_i]
+            print(offset)
+
+            copy_base_pose[start_i:] += offset
+
+        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
+        plt.plot(copy_base_pose[:, 0], copy_base_pose[:, 2], label='corrected')
+        plt.legend()
+        plt.show()
+
+    def base_center_trajectory_reconstruction_2attempt(self):
+        filtered_rotation = np.diff(
+            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
+        )
+
+        margin = 0.05
+        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
+        transitions = np.diff(base_rotating)
+
+        start_idx = np.argwhere(transitions == 1).flatten() + 1  # base rotation starts
+        end_idx   = np.argwhere(transitions == -1).flatten() + 1  # base rotation ends
+
+        # Build list of "still" segments (between rotations)
+        # A still segment runs from end_idx[i] to start_idx[i+1]
+        still_segments = []
+
+        # Segment before first rotation
+        first_start = start_idx[0] if len(start_idx) > 0 else len(self.base_position)
+        still_segments.append((0, first_start))
+
+        n = min(len(start_idx), len(end_idx))
+        for i in range(n):
+            seg_start = end_idx[i]
+            seg_end   = start_idx[i + 1] if i + 1 < len(start_idx) else len(self.base_position)
+            still_segments.append((seg_start, seg_end))
+
+        # Now stitch still segments together by translating each to connect to the previous
+        reconstructed = []
+        offset = np.zeros(3)
+
+        for i, (s, e) in enumerate(still_segments):
+            segment = self.base_position[s:e].copy()
+            if len(segment) == 0:
+                continue
+            segment += offset
+            if i > 0 and len(reconstructed) > 0:
+                # Shift so this segment starts where the last one ended
+                gap = reconstructed[-1][-1] - segment[0]
+                segment += gap
+                offset += gap
+            reconstructed.append(segment)
+
+        stitched = np.concatenate(reconstructed, axis=0)
+
+        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
+        plt.plot(stitched[:, 0], stitched[:, 2], label='corrected')
+        plt.legend()
+        plt.grid(True, ls='--')
+        plt.show()
