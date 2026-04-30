@@ -35,6 +35,11 @@ def num_derivative(input_array, frequency, axis=0):
     
 def find_center(input_points, radius):
     from scipy.optimize import minimize
+    input_points = input_points[~np.isnan(input_points).any(axis=1)]
+    radius = None
+    import matplotlib.pyplot as plt
+    plt.scatter(input_points[:,0]+1, input_points[:,2] + 1, c=(np.random.random(), np.random.random(), np.random.random()))
+    print(input_points)
     if radius is None:
         #[x, y, r]
         def squared_error(center):
