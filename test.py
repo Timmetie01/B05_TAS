@@ -26,29 +26,23 @@ take_5 = classes.Data('take_005')
 # plt.grid(True, ls='--')
 # plt.show()
 
-take_2.plot_base_circle((True, False, True), showplot = False)
-take_2.base_center_trajectory_reconstruction_2attempt((True, False, True))
-take_2.plot_operations('base_position', ('derivative_0'), (True, False, True), color='purple', label='Base', showplot=False)
-#take_2.plot_trajectory_center(part='sections', XYZ=(True, False, True), color='#00B8C8', showplot=False, type='line', label='Trajectory Center')
-#take_2.plot_trajectory_center(part='target', XYZ=(True, False, True), color='darkorange', showplot=False, type='scatter', label='Target Center')
-#take_2.plot_operations('target', ('derivative_0'), (True, False, True), color='black', label='Target', showplot=False)
-#take_2.plot_waypoint_estimates((True, False, True), color='darkgreen', showplot=False)
-#take_2.plot_target_waypoints((True, False, True), color='firebrick', showplot=False)
-#take_2.plot_operations('arm_position', ('derivative_0'), (True, False, True), color='darkblue', label='arm', custom_axis_label=('X (mm)',None, 'Z (mm)'), showplot=False)
+
+#take_2.base_center_trajectory_reconstruction_2attempt((True, False, True))
+
+take_2.plot_operations('base_position', ('derivative_0'), (True, False, True), color="#740049", label='Base', showplot=False)
+take_2.plot_trajectory_center(part='sections', XYZ=(True, False, True), color='#00B8C8', showplot=False, type='line', label='Trajectory Center')
+take_2.plot_trajectory_center(part='target', XYZ=(True, False, True), color="#B03D00", showplot=False, type='scatter', label='Target Center')
+take_2.plot_waypoint_estimates((True, False, True), color="#11671C", showplot=False)
+take_2.plot_target_waypoints((True, False, True), color="#780E0E", showplot=False)
+take_2.plot_operations('arm_position', ('derivative_0'), (True, False, True), color="#120A80", label='arm', custom_axis_label=('X (mm)',None, 'Z (mm)'), showplot=False)
 plt.legend(fontsize=12)
 plt.grid(True, ls='--')
 plt.show()
 
- 
 
-#take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
-#take_1.motion_capture_waypoint_error(True)
-#take_2.motion_capture_waypoint_error(True)
-#take_3.motion_capture_waypoint_error(True)
-#take_3.motion_capture_waypoint_error(True)
-#take_4.plot_waypoint_error(print_report=True, showplot=True)
+take_4.plot_waypoint_tracking_error(print_report=False, showplot=False)
+plt.legend(fontsize=12)
+plt.grid(True, ls='--')
+plt.show()
 
 
-
-#arm_noise = take_2.noise_covariance('arm_position')
-#print(arm_noise)

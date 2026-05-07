@@ -309,10 +309,12 @@ class Data:
         for i in indices[:,0]:
             target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
-        from calculations import find_center
-        target_waypoint += self.get_trajectory_center('total')[0,:] + np.array([r, 0, 0])
+        #from calculations import find_center
+        #target_waypoint += self.get_trajectory_center('total')[0,:] + np.array([r, 0, 0])
         #target_waypoint += self.get_trajectory_center('sections')[0,:] + np.array([r, 0, 0])
-        #target_waypoint += self.arm_position[0,:]
+        target_waypoint += self.arm_position[0,:]
+
+        #print(self.arm_position[0,:] + np.array([-r, 0, 0]))
 
         return target_waypoint  #Crazy guess: what if markers not on tip of the arm??
 
@@ -425,94 +427,8 @@ class Data:
 
             
     def plot_different_dimensions(self, data, XYZ, color, label, title, custom_axis_label, type='line'):
-        #Type is either line or scatter
-        import graphing
-        import matplotlib.pyplot as plt
-        #There's likely a smarter way to do this but this is easy
-
-
-        if XYZ == (True, True, True):
-            ax = graphing.get_ax(XYZ)
-            if type == 'line':
-                ax.plot(data[:,0], data[:,1], data[:,2], label=label, color=color)
-            elif type == 'scatter':
-                ax.scatter(data[:,0], data[:,1], data[:,2], label=label, color=color)
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
-            ax.set_zlabel('Z')
-            plt.gca().set_aspect('equal')
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-            if custom_axis_label[2] is not None: ax.set_zlabel(custom_axis_label[2])
-
-        elif XYZ == (True, True, False):
-            ax = graphing.get_ax(XYZ)
-            if type == 'line':
-                ax.plot(data[:,0], data[:,1], label=label, color=color)
-            elif type == 'scatter':
-                ax.scatter(data[:,0], data[:,1], label=label, color=color)
-            ax.set_xlabel('X')
-            ax.set_ylabel('Y')
-            plt.gca().set_aspect('equal')
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-        
-        elif XYZ == (True, False, True):
-            ax = graphing.get_ax(XYZ)
-            if type == 'line':
-                ax.plot(data[:,0], data[:,2], label=label, color=color)
-            elif type == 'scatter':
-                ax.scatter(data[:,0], data[:,2], label=label, color=color)
-            ax.set_xlabel('X')
-            ax.set_ylabel('Z')
-            ax.xaxis.set_inverted(True)
-            plt.gca().set_aspect('equal')
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[2] is not None: ax.set_ylabel(custom_axis_label[2])
-
-        elif XYZ == (False, True, True):
-            ax = graphing.get_ax(XYZ)
-            if type == 'line': 
-                ax.plot(data[:,1], data[:,2], label=label, color=color)
-            elif type == 'scatter':
-                ax.scatter(data[:,1], data[:,2], label=label, color=color)
-            ax.set_xlabel('Y')
-            ax.set_ylabel('Z')
-            plt.gca().set_aspect('equal')
-            if custom_axis_label[1] is not None: ax.set_xlabel(custom_axis_label[1])
-            if custom_axis_label[2] is not None: ax.set_ylabel(custom_axis_label[2])
-
-        elif XYZ == (True, False, False):
-            ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,0]))/self.frequency, data[:,0], label=label, color=color)
-            ax.set_xlabel('time (s)')
-            ax.set_ylabel('X')
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-
-        elif XYZ == (False, True, False):
-            ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,1]))/self.frequency, data[:,1], label=label, color=color)
-            ax.set_xlabel('time (s)')
-            ax.set_ylabel('Y')
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-
-        elif XYZ == (False, False, True):
-            ax = graphing.get_ax(XYZ)
-            ax.plot(np.arange(len(data[:,2]))/self.frequency, data[:,2], label=label, color=color)
-            ax.set_xlabel('time (s)')
-            ax.set_ylabel('Z')
-        
-            if custom_axis_label[0] is not None: ax.set_xlabel(custom_axis_label[0])
-            if custom_axis_label[1] is not None: ax.set_ylabel(custom_axis_label[1])
-
-        else:
-            print('Choose correct plot dimensions, either 3d or 2d allowed.')
-            raise ValueError
-    
-        
-        if title is not None: ax.set_title(title)
+        from graphing import plot_dimensions
+        plot_dimensions(self, data, XYZ, color, label, title, custom_axis_label, type)
 
 
 
@@ -568,11 +484,19 @@ class Data:
 
 
 
-    def plot_waypoint_tracking_error(self, color='darkblue', print_report=True, showplot=True):
+    def plot_waypoint_tracking_error(self, dimensions=(True,True,True,True), print_report=True, showplot=True):
         import matplotlib.pyplot as plt
-        error = self.waypoint_tracking_error(print_report=print_report)
-        plt.scatter(range(len(error)), error, color=color, label=f'Take {self.data_type[-1]}')
-        plt.title('Error at waypoints')
+
+        error = self.waypoint_tracking_error(print_report=print_report, return_dimensions_separately=True)
+
+        color = ('darkblue', 'firebrick', 'darkgreen', 'purple')
+        label = ('Absolute', 'X', 'Y', 'Z')
+
+        for i, dim in enumerate(dimensions):
+            if dim:
+                plt.scatter(range(len(error[i])), error[i], color=color[i], label=label[i])
+
+        #plt.title('Error at waypoints')
         plt.xlabel('Waypoint number')
         plt.ylabel('error (mm)')
         if showplot:
