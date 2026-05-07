@@ -676,11 +676,11 @@ class Data:
         start_idx = np.argwhere(transitions == 1).flatten() + 1  # base rotation starts
         end_idx   = np.argwhere(transitions == -1).flatten() + 1  # base rotation ends
 
-        # Build list of "still" segments (between rotations)
-        # A still segment runs from end_idx[i] to start_idx[i+1]
+        # build list of "still" segments (between rotations)
+        # a still segment runs from end_idx[i] to start_idx[i+1]
         still_segments = []
 
-        # Segment before first rotation
+        # segment before first rotation
         first_start = start_idx[0] if len(start_idx) > 0 else len(self.base_position)
         still_segments.append((0, first_start))
 
@@ -688,9 +688,9 @@ class Data:
         for i in range(n):
             seg_start = end_idx[i]
             seg_end   = start_idx[i + 1] if i + 1 < len(start_idx) else len(self.base_position)
-            still_segments.append((seg_start, seg_end))
+            still_segments.append((seg_start, seg_end))  #need thes for next step
 
-        # Now stitch still segments together by translating each to connect to the previous
+        # now connecting still segments together by translating each to connect to the previous
         reconstructed = []
         offset = np.zeros(3)
 
@@ -700,7 +700,7 @@ class Data:
                 continue
             segment += offset
             if i > 0 and len(reconstructed) > 0:
-                # Shift so this segment starts where the last one ended
+                # Shifting so this segment starts where the last one ends
                 gap = reconstructed[-1][-1] - segment[0]
                 segment += gap
                 offset += gap
