@@ -79,7 +79,7 @@ class Data:
     
     def maneuver_start_end(self, stop_duration=1):
 
-        if self.data_type == 'take_001': start_offset = 1.85
+        if self.data_type == 'take_001': start_offset = 1.9
         elif self.data_type == 'take_002': start_offset = 6.75
         elif self.data_type == 'take_003': start_offset = 8.15
         elif self.data_type == 'take_004': start_offset = 2.7
@@ -298,9 +298,6 @@ class Data:
         target_waypoint[:,0] = r * (np.cos(angle_arr) - 1)
         target_waypoint[:,2] = r * ( -1 * np.sin(angle_arr))
 
-
-        
-
         #To get the indices where the array should be doubled, use the input file and find the indices of its waypoints where the base moves
         indices = np.argwhere(self.base_movement[:,0])
 
@@ -313,7 +310,9 @@ class Data:
             target_waypoint = np.insert(target_waypoint, i, target_waypoint[i,:], axis=0)
 
         from calculations import find_center
-        target_waypoint += self.get_trajectory_center('sections')[0,:] + np.array([r, 0, 0])
+        target_waypoint += self.get_trajectory_center('total')[0,:] + np.array([r, 0, 0])
+        #target_waypoint += self.get_trajectory_center('sections')[0,:] + np.array([r, 0, 0])
+        #target_waypoint += self.arm_position[0,:]
 
         return target_waypoint  #Crazy guess: what if markers not on tip of the arm??
 
@@ -415,6 +414,7 @@ class Data:
         import matplotlib.pyplot as plt
         
         data = self.get_trajectory_center(part)
+        #print(data)
 
         self.plot_different_dimensions(data, XYZ=XYZ, color=color, label=label, title=title, custom_axis_label=custom_axis_label, type=type)
 
@@ -663,119 +663,6 @@ class Data:
 
         return result
 
-    def base_center_trajectory_reconstruction_1attempt(self):
-        filtered_rotation = np.diff(
-            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
-        )
-
-        margin = 0.05
-        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
-        base_rotating = np.diff(base_rotating)
-
-        start_idx = np.argwhere(base_rotating == 1).flatten()
-        end_idx   = np.argwhere(base_rotating == -1).flatten()
-
-        copy_base_pose = self.base_position.copy()
-
-        n = min(len(start_idx), len(end_idx) - 1)
-
-        for i in range(n):
-            end_i   = end_idx[i] + 1
-            start_i = start_idx[i + 1] + 1
-
-            offset = copy_base_pose[end_i] - copy_base_pose[start_i]
-            print(offset)
-
-            copy_base_pose[start_i:] += offset
-
-        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
-        plt.plot(copy_base_pose[:, 0], copy_base_pose[:, 2], label='corrected')
-        plt.legend()
-        plt.show()
-
-    def base_center_trajectory_reconstruction_2attempt(self):
-        filtered_rotation = np.diff(
-            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
-        )
-
-        margin = 0.05
-        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
-        transitions = np.diff(base_rotating)
-
-        start_idx = np.argwhere(transitions == 1).flatten() + 1  # base rotation starts
-        end_idx   = np.argwhere(transitions == -1).flatten() + 1  # base rotation ends
-
-        # Build list of "still" segments (between rotations)
-        # A still segment runs from end_idx[i] to start_idx[i+1]
-        still_segments = []
-
-        # Segment before first rotation
-        first_start = start_idx[0] if len(start_idx) > 0 else len(self.base_position)
-        still_segments.append((0, first_start))
-
-        n = min(len(start_idx), len(end_idx))
-        for i in range(n):
-            seg_start = end_idx[i]
-            seg_end   = start_idx[i + 1] if i + 1 < len(start_idx) else len(self.base_position)
-            still_segments.append((seg_start, seg_end))
-
-        # Now stitch still segments together by translating each to connect to the previous
-        reconstructed = []
-        offset = np.zeros(3)
-
-        for i, (s, e) in enumerate(still_segments):
-            segment = self.base_position[s:e].copy()
-            if len(segment) == 0:
-                continue
-            segment += offset
-            if i > 0 and len(reconstructed) > 0:
-                # Shift so this segment starts where the last one ended
-                gap = reconstructed[-1][-1] - segment[0]
-                segment += gap
-                offset += gap
-            reconstructed.append(segment)
-
-        stitched = np.concatenate(reconstructed, axis=0)
-
-        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
-        plt.plot(stitched[:, 0], stitched[:, 2], label='corrected')
-        plt.legend()
-        plt.grid(True, ls='--')
-        plt.show()
-
-    def base_center_trajectory_reconstruction_1attempt(self):
-        '''
-        THIS FUNCTION IS DEPRECATED. USE THE 2ND ATTEMPT
-        '''
-        print('\n\n*\t*\t*\t*\tThe first attempt at base trajectory reconstruction is deprecated. use the second attempt!!\t*\t*\t*\t*\n\n\n')
-        filtered_rotation = np.diff(
-            self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
-        )
-
-        margin = 0.05
-        base_rotating = np.where(np.abs(filtered_rotation) > margin, 1, 0)
-        base_rotating = np.diff(base_rotating)
-
-        start_idx = np.argwhere(base_rotating == 1).flatten()
-        end_idx   = np.argwhere(base_rotating == -1).flatten()
-
-        copy_base_pose = self.base_position.copy()
-
-        n = min(len(start_idx), len(end_idx) - 1)
-
-        for i in range(n):
-            end_i   = end_idx[i] + 1
-            start_i = start_idx[i + 1] + 1
-
-            offset = copy_base_pose[end_i] - copy_base_pose[start_i]
-            print(offset)
-
-            copy_base_pose[start_i:] += offset
-
-        plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')
-        plt.plot(copy_base_pose[:, 0], copy_base_pose[:, 2], label='corrected')
-        plt.legend()
-        plt.show()
 
     def base_center_trajectory_reconstruction_2attempt(self,  XYZ=(True, True, True), color='black', label='Base Center Trajectory Reconstruction', title=None, custom_axis_label=(None, None, None), type='line'):
         filtered_rotation = np.diff(
