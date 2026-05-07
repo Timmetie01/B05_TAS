@@ -440,7 +440,7 @@ class Data:
             error_x = self.waypoint_positions()[:,0] - self.target_waypoints()[:,0]
             error_y = self.waypoint_positions()[:,1] - self.target_waypoints()[:,1]
             error_z = self.waypoint_positions()[:,2] - self.target_waypoints()[:,2]
-            print(error, max(error), min(error))
+            #print(error, max(error), min(error))
         if print_report:
             print(f'For take {self.data_type[-1]}, the errors FROM WAYPOINT TO TARGET are built up as follows: ')
             print(f'The absolute error goes from {round(min(error), 2)} mm up to {round(max(error), 2)} mm. The standard deviation is {round(np.std(error), 2)} mm, and average is {round(np.average(error), 2)} mm. Average of the absolute error is {round(np.average(np.abs(error)), 2)} mm.')
@@ -497,11 +497,13 @@ class Data:
                 plt.scatter(range(len(error[i])), error[i], color=color[i], label=label[i])
 
         #plt.title('Error at waypoints')
-        plt.xlabel('Waypoint number')
-        plt.ylabel('error (mm)')
         if showplot:
+            plt.xlabel('Waypoint number', fontsize=25)
+            plt.ylabel('error (mm)', fontsize=25)
+            plt.xticks(fontsize=20)
+            plt.yticks(fontsize=20)
             plt.grid(True, ls='--')
-            plt.legend()
+            plt.legend(fontsize=30, markerscale=5)
             plt.show()
 
 
