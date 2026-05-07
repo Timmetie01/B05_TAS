@@ -54,10 +54,10 @@ def get_base_target(data_class, data_type):
     }
 
     rotation = {
-        '1':-0.1,
-        '2':0.049,
-        '3':0,
-        '4':0
+        '1':0.06,
+        '2':0.05,
+        '3':0.05,
+        '4':0.05
     }
 
     start_pos = data_class.base_position[0,:] + offset_vector[data_type[-1]]
