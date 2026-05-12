@@ -42,6 +42,9 @@ plt.grid(True, ls='--')
 plt.show()
 
 
+take_1.plot_waypoint_tracking_error(print_report=False, showplot=True)
+take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
+take_3.plot_waypoint_tracking_error(print_report=False, showplot=True)
 take_4.plot_waypoint_tracking_error(print_report=False, showplot=True)
 
 

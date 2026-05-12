@@ -340,7 +340,6 @@ class Data:
 
     def plot_base_circle(self, XYZ=(True,True,True), type='line', showplot=True, label='Base half circle', title=None, color='firebrick', custom_axis_label=(None, None, None)):
         import matplotlib.pyplot as plt
-        import data_import
 
         self.plot_different_dimensions(data_import.get_base_target(self, self.data_type), XYZ, color=color, label=label, type=type, title=title, custom_axis_label=custom_axis_label)
         
@@ -642,3 +641,4 @@ class Data:
         plt.show()
         '''
         self.plot_different_dimensions(stitched, XYZ, color, label, title, custom_axis_label, type)
+        return stitched

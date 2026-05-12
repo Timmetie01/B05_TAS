@@ -3,11 +3,6 @@ import numpy as np
 
 stored_numpy_arrays = np.load("AE2224-I_dataset/saved_data.npz", allow_pickle=True)
 
-def get_velocity_test_data():
-    #For reference: importing 250k test datapoints in a 1d array takes approximately 0.0364 seconds
-    print("The velocity test data is outdated. Use the actual experiments pls")
-    raise NotImplementedError
-
 def get_data(filepath):
     #If the user requests data stored in a numpy array, return that. If not, return file like normal
     if filepath[:24] == 'AE2224-I_dataset/take_00':
@@ -16,6 +11,11 @@ def get_data(filepath):
     else:
         data = pd.read_csv(filepath, header=None)
         return pd.DataFrame.to_numpy(data)
+
+def get_velocity_test_data():
+    #For reference: importing 250k test datapoints in a 1d array takes approximately 0.0364 seconds
+    print("The velocity test data is outdated. Use the actual experiments pls")
+    raise NotImplementedError
 
 def get_target_position(data_class, data_type):
     start_pos = data_class.arm_position[0,:]
@@ -90,7 +90,7 @@ def save_data_arrays(header_size=5, right_cutoff=10):
                 take_004=take_004[header_size:,:-1 * right_cutoff], 
                 take_005=take_005[header_size:,:-1 * right_cutoff])
 
-#When we get corrected or different data or something, the function below must be executed to renew saved numpy arrays
+#When we get corrected or different data or something, the line below must be executed to renew saved numpy arrays
 #save_data_arrays(5, 10)
     
     
