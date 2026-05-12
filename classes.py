@@ -219,6 +219,8 @@ class Data:
                     data = calculations.num_derivative(data, self.frequency)
 
             elif i[0:17] == 'threshold_filter_':
+                print('Sorry, the threshold filter is not yet implemented!'); raise ValueError
+
                 component = 0 if i[17] == 'X' else 1 if i[17] == 'Y' else 2 if i[17] == 'Z' else 3
                 if component == 3:
                     raise ValueError
