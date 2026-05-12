@@ -619,7 +619,14 @@ class Data:
 
         # now connecting still segments together by translating each to connect to the previous
         reconstructed = []
-        offset = np.zeros(3)
+        #offset = np.zeros(3)
+        offset_vector = {
+            '1':np.array([-270.48, 0, 360.64]),
+            '2':np.array([-264.3, 0, 360.64]),
+            '3':np.array([-264.3, 0, 360.64]),
+            '4':np.array([-254.28, 0, 339.04])
+        }
+        offset = offset_vector[self.data_type[-1]]
 
         for i, (s, e) in enumerate(still_segments):
             segment = self.base_position[s:e].copy()
@@ -632,6 +639,20 @@ class Data:
                 segment += gap
                 offset += gap
             reconstructed.append(segment)
+
+            #adding the rotation segments while keeping pose constant:
+
+            if i < len(end_idx):
+
+                rot_start = start_idx[i]
+                rot_end = end_idx[i]
+
+            rotation_length = rot_end - rot_start
+
+            if rotation_length > 0:
+
+                frozen_segment = np.tile(segment[-1], (rotation_length, 1)) #np.tile just repeats the value 'rotation length' times
+                reconstructed.append(frozen_segment)
 
         stitched = np.concatenate(reconstructed, axis=0)
 

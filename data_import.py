@@ -31,12 +31,12 @@ def get_target_position(data_class, data_type):
     return target_pos
 
 def get_base_target(data_class, data_type):
-    
+
     offset_vector = {
-        '1':np.array([0, 0, 450.8]),
-        '2':np.array([0, 0, 440.5]),
-        '3':np.array([0, 0, 440.5]),
-        '4':np.array([0, 0, 423.8])
+        '1':np.array([-270.48, 0, 360.64]),
+        '2':np.array([-264.3, 0, 360.64]),
+        '3':np.array([-264.3, 0, 360.64]),
+        '4':np.array([-254.28, 0, 339.04])
     }
 
     total_rotation_of_base = {
