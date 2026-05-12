@@ -589,7 +589,7 @@ class Data:
         return result
 
 
-    def base_center_trajectory_reconstruction_2attempt(self,  XYZ=(True, True, True), color='black', label='Base Center Trajectory Reconstruction', title=None, custom_axis_label=(None, None, None), type='line'):
+    def base_center_trajectory_reconstruction_2attempt(self,  XYZ=(True, True, True), color='black', label='Base Center Trajectory Reconstruction', title=None, custom_axis_label=(None, None, None), type='line', plot=True):
         filtered_rotation = np.diff(
             self.get_data_after_operations('base_rotation_deg', ('ma_filter_11',))[:, 1]
         )
@@ -640,5 +640,6 @@ class Data:
         plt.grid(True, ls='--')
         plt.show()
         '''
-        self.plot_different_dimensions(stitched, XYZ, color, label, title, custom_axis_label, type)
+        if plot:
+            self.plot_different_dimensions(stitched, XYZ, color, label, title, custom_axis_label, type)
         return stitched
