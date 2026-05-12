@@ -643,3 +643,13 @@ class Data:
         if plot:
             self.plot_different_dimensions(stitched, XYZ, color, label, title, custom_axis_label, type)
         return stitched
+
+    def imposed_base_velocity(self):
+        target = self.base_center_trajectory_reconstruction_2attempt(plot=False)
+        print(target)
+
+        import calculations
+
+        vel = calculations.num_derivative(target, self.frequency)
+        vel = np.abs(vel)
+        return vel, target

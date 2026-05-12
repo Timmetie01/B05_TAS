@@ -42,6 +42,40 @@ plt.grid(True, ls='--')
 plt.show()
 
 
+take_4.plot_waypoint_tracking_error(print_report=False, showplot=False)
+plt.legend(fontsize=12)
+plt.grid(True, ls='--')
+plt.show()
+
+ 
+
+#take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
+#take_1.motion_capture_waypoint_error(True)
+#take_2.motion_capture_waypoint_error(True)
+#take_3.motion_capture_waypoint_error(True)
+#take_3.motion_capture_waypoint_error(True)
+#take_4.plot_waypoint_error(print_report=True, showplot=True)
+
+
+
+#arm_noise = take_2.noise_covariance('arm_position')
+#print(arm_noise)
+vel, target = take_2.imposed_base_velocity()
+print(vel)
+plt.figure()
+# plt.plot(vel[:,0], label='vx')
+# plt.plot(vel[:,1], label='vy')
+plt.plot(vel[:,2], label='vz')
+# plt.plot(target[:,0], label='x')
+# plt.plot(target[:,1], label='y')
+# plt.plot(target[:,2], label='z')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+plt.legend()
+plt.grid(True)
+plt.show()
 take_1.plot_waypoint_tracking_error(print_report=False, showplot=True)
 take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
 take_3.plot_waypoint_tracking_error(print_report=False, showplot=True)
