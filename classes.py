@@ -628,6 +628,8 @@ class Data:
         }
         offset = offset_vector[self.data_type[-1]]
 
+        # expected_frozen_samples = 0
+
         for i, (s, e) in enumerate(still_segments):
             segment = self.base_position[s:e].copy()
             if len(segment) == 0:
@@ -650,11 +652,14 @@ class Data:
             rotation_length = rot_end - rot_start
 
             if rotation_length > 0:
-
+                #expected_frozen += rotation_length
                 frozen_segment = np.tile(segment[-1], (rotation_length, 1)) #np.tile just repeats the value 'rotation length' times
                 reconstructed.append(frozen_segment)
 
         stitched = np.concatenate(reconstructed, axis=0)
+        # print(f"[DEBUG] Expected frozen samples: {expected_frozen_samples}")
+        # print(f"[DEBUG] Final trajectory length: {len(stitched)}")
+        # print(f"[DEBUG] Original trajectory length: {len(self.base_position)}")
 
         '''
         plt.plot(self.base_position[:, 0], self.base_position[:, 2], label='original')

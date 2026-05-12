@@ -18,34 +18,34 @@ take_5 = classes.Data('take_005')
 #Markers not on arm tip??
 #Wrong arm input?
 
-take_2.plot_maneuver_duration(-20, 20)
-take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (False, False, True), color='darkblue', label='arm_Z', showplot=False)
-take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (False, True, False), color='darkorange', label='arm_Y', showplot=False)
-take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (True, False, False), color='purple', label='arm_X', showplot=False)
-plt.legend(fontsize=20)
-plt.xlabel('newlabel', fontsize=15)
-plt.ylabel('newlabel', fontsize=15)
-plt.grid(True, ls='--')
-plt.show()
+# take_2.plot_maneuver_duration(-20, 20)
+# take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (False, False, True), color='darkblue', label='arm_Z', showplot=False)
+# take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (False, True, False), color='darkorange', label='arm_Y', showplot=False)
+# take_2.plot_operations('arm_position', ('ma_filter_5', 'derivative_1'), (True, False, False), color='purple', label='arm_X', showplot=False)
+# plt.legend(fontsize=20)
+# plt.xlabel('newlabel', fontsize=15)
+# plt.ylabel('newlabel', fontsize=15)
+# plt.grid(True, ls='--')
+# plt.show()
 
+take_2.plot_base_circle((True, False, True), showplot = False)
+take_2.base_center_trajectory_reconstruction_2attempt((True, False, True))
 
-#take_2.base_center_trajectory_reconstruction_2attempt((True, False, True))
-
-take_1.plot_operations('base_position', ('derivative_0'), (True, False, True), color="#740049", label='Base', showplot=False)
-take_1.plot_trajectory_center(part='sections', XYZ=(True, False, True), color='#00B8C8', showplot=False, type='line', label='Trajectory Center')
-take_1.plot_trajectory_center(part='target', XYZ=(True, False, True), color="#B03D00", showplot=False, type='scatter', label='Target Center')
-take_1.plot_waypoint_estimates((True, False, True), color="#11671C", showplot=False)
-take_1.plot_target_waypoints((True, False, True), color="#780E0E", showplot=False)
-take_1.plot_operations('arm_position', ('derivative_0'), (True, False, True), color="#120A80", label='arm', custom_axis_label=('X (mm)',None, 'Z (mm)'), showplot=False)
+take_2.plot_operations('base_position', ('derivative_0'), (True, False, True), color="#740049", label='Base', showplot=False)
+# take_1.plot_trajectory_center(part='sections', XYZ=(True, False, True), color='#00B8C8', showplot=False, type='line', label='Trajectory Center')
+# take_1.plot_trajectory_center(part='target', XYZ=(True, False, True), color="#B03D00", showplot=False, type='scatter', label='Target Center')
+# take_1.plot_waypoint_estimates((True, False, True), color="#11671C", showplot=False)
+# take_1.plot_target_waypoints((True, False, True), color="#780E0E", showplot=False)
+# take_1.plot_operations('arm_position', ('derivative_0'), (True, False, True), color="#120A80", label='arm', custom_axis_label=('X (mm)',None, 'Z (mm)'), showplot=False)
 plt.legend(fontsize=12)
 plt.grid(True, ls='--')
 plt.show()
 
 
-take_4.plot_waypoint_tracking_error(print_report=False, showplot=False)
-plt.legend(fontsize=12)
-plt.grid(True, ls='--')
-plt.show()
+# take_4.plot_waypoint_tracking_error(print_report=False, showplot=False)
+# plt.legend(fontsize=12)
+# plt.grid(True, ls='--')
+# plt.show()
 
  
 
@@ -74,10 +74,10 @@ plt.grid(True)
 plt.show()
 
 
-take_1.plot_waypoint_tracking_error(print_report=False, showplot=True)
-take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
-take_3.plot_waypoint_tracking_error(print_report=False, showplot=True)
-take_4.plot_waypoint_tracking_error(print_report=False, showplot=True)
+# take_1.plot_waypoint_tracking_error(print_report=False, showplot=True)
+# take_2.plot_waypoint_tracking_error(print_report=False, showplot=True)
+# take_3.plot_waypoint_tracking_error(print_report=False, showplot=True)
+# take_4.plot_waypoint_tracking_error(print_report=False, showplot=True)
 
 
 
